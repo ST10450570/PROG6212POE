@@ -8,7 +8,6 @@
 
   <ItemGroup>
     <Folder Include="Data\" />
-    <Folder Include="ViewModels\" />
     <Folder Include="Validation\" />
     <Folder Include="Services\" />
     <Folder Include="Views\Claims\" />
