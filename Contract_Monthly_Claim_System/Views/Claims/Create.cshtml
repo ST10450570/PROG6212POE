@@ -1,0 +1,83 @@
+﻿@model ClaimCreateViewModel
+
+@{
+    ViewData["Title"] = "Submit New Claim";
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-8 col-md-10">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="my-2"><i class="fas fa-plus-circle me-2"></i>@ViewData["Title"]</h3>
+            </div>
+            <div class="card-body p-4">
+                <form asp-action="Create" method="post" enctype="multipart/form-data">
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+                    <div class="mb-3">
+                        <label asp-for="WorkDescription" class="form-label"></label>
+                        <input asp-for="WorkDescription" class="form-control" />
+                        <span asp-validation-for="WorkDescription" class="text-danger"></span>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="HoursWorked" class="form-label"></label>
+                            <input asp-for="HoursWorked" id="hours" class="form-control" />
+                            <span asp-validation-for="HoursWorked" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="HourlyRate" class="form-label"></label>
+                            <div class="input-group">
+                                <span class="input-group-text">R</span>
+                                <input asp-for="HourlyRate" id="rate" class="form-control" />
+                            </div>
+                            <span asp-validation-for="HourlyRate" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Total Claim Amount</label>
+                        <div id="total-display" class="total-display">R 0.00</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Notes" class="form-label"></label>
+                        <textarea asp-for="Notes" class="form-control" rows="3"></textarea>
+                        <span asp-validation-for="Notes" class="text-danger"></span>
+                    </div>
+
+                    <hr class="my-4" />
+
+                    <div class="mb-3">
+                        <label asp-for="SupportingDocument" class="form-label"></label>
+                        <input asp-for="SupportingDocument" class="form-control" type="file" id="fileUpload" />
+                        <span asp-validation-for="SupportingDocument" class="text-danger"></span>
+                        <div id="file-upload-feedback" class="form-text mt-2 text-success"></div>
+                    </div>
+
+                    <div class="d-grid mt-4">
+                        <button type="submit" class="btn btn-primary btn-lg"><i class="fas fa-paper-plane me-2"></i>Create Claim</button>
+                    </div>
+                </form>
+            </div>
+            <div class="card-footer text-center">
+                <div class="small"><a asp-action="MyClaims">Back to My Claims</a></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        // Use site.js for this logic by adding data attributes
+        document.addEventListener("DOMContentLoaded", function () {
+            // Add data attributes to trigger the calculator
+            document.getElementById('hours').setAttribute('data-calculate', 'total');
+            document.getElementById('rate').setAttribute('data-calculate', 'total');
+        });
+    </script>
+}

@@ -1,0 +1,108 @@
+﻿@model IEnumerable<Claim>
+
+@{
+    ViewData["Title"] = "Coordinator Dashboard";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4 border-bottom-themed pb-2">
+    <h1 class="h2"><i class="fas fa-tasks me-2"></i>Claims Pending Verification</h1>
+</div>
+
+<div class="card guideline-coordinator mb-4">
+    <div class="card-header">
+        <h6 class="mb-0"><i class="fas fa-info-circle me-2"></i>Coordinator Guidelines</h6>
+    </div>
+    <div class="card-body">
+        <ul class="list-unstyled mb-0">
+            <li><i class="fas fa-check-circle text-success me-2"></i>Review claims for completeness and accuracy.</li>
+            <li><i class="fas fa-undo text-secondary me-2"></i>Return claims that require additional information from the lecturer.</li>
+            <li><i class="fas fa-arrow-up text-primary me-2"></i>Verify valid claims to escalate them to the Academic Manager for final approval.</li>
+        </ul>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        @if (!Model.Any())
+        {
+            <div class="text-center p-5">
+                <i class="fas fa-inbox fa-3x text-secondary mb-3"></i>
+                <h4 class="text-secondary">The review queue is empty.</h4>
+                <p>All submitted claims have been processed.</p>
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th>Claim #</th>
+                            <th>Lecturer</th>
+                            <th>Submitted</th>
+                            <th>Amount</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var claim in Model)
+                        {
+                            <tr>
+                                <td class="fw-bold">@claim.ClaimNumber</td>
+                                <td>@claim.User?.FullName</td>
+                                <td>@claim.SubmittedDate?.ToString("dd MMM yyyy")</td>
+                                <td>@claim.TotalAmount.ToString("C", new System.Globalization.CultureInfo("en-ZA"))</td>
+                                <td>
+                                    <div class="btn-group btn-group-sm">
+                                        <a asp-action="Details" asp-route-id="@claim.Id" class="btn btn-outline-secondary" title="View Details"><i class="fas fa-eye"></i> View</a>
+                                        <button type="button" class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#actionModal" data-action-type="Verify" data-claim-id="@claim.Id" data-claim-number="@claim.ClaimNumber"><i class="fas fa-check"></i> Verify</button>
+                                        <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#actionModal" data-action-type="Return" data-claim-id="@claim.Id" data-claim-number="@claim.ClaimNumber"><i class="fas fa-undo"></i> Return</button>
+                                        <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#actionModal" data-action-type="Reject" data-claim-id="@claim.Id" data-claim-number="@claim.ClaimNumber"><i class="fas fa-times"></i> Reject</button>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>
+
+<div class="modal fade" id="actionModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="post">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="actionModalTitle"></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>You are about to <strong id="actionName"></strong> claim <strong id="actionClaimNumber"></strong>.</p>
+                    <input type="hidden" name="id" id="actionClaimId" />
+                    <div class="mb-3" id="comments-section">
+                        <label class="form-label" id="comments-label"></label>
+                        <textarea class="form-control" name="comments" rows="3"></textarea>
+                    </div>
+                    <div class="mb-3" id="reason-section">
+                        <label class="form-label" id="reason-label">Reason for Rejection *</label>
+                        <input type="text" class="form-control" name="reason" />
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn" id="actionSubmitButton"></button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Use site.js for this logic
+        document.getElementById('actionModal').addEventListener('show.bs.modal', function (event) {
+            setupActionModal(event);
+        });
+    </script>
+}

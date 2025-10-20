@@ -1,0 +1,59 @@
+﻿@model IEnumerable<Claim>
+
+@{
+    ViewData["Title"] = "My Claims";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4 border-bottom-themed pb-2">
+    <h1 class="h2"><i class="fas fa-file-invoice me-2"></i>My Claims</h1>
+    <a asp-action="Create" class="btn btn-primary"><i class="fas fa-plus me-1"></i>New Claim</a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        @if (!Model.Any())
+        {
+            <div class="text-center p-5">
+                <i class="fas fa-inbox fa-3x text-secondary mb-3"></i>
+                <h4 class="text-secondary">No claims found.</h4>
+                <p>Click "New Claim" to get started.</p>
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th>Claim #</th>
+                            <th>Description</th>
+                            <th>Date Created</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr style="cursor: pointer;" onclick="window.location.href='@Url.Action("Details", new { id = item.Id })'">
+                                <td class="fw-bold">@item.ClaimNumber</td>
+                                <td>@item.WorkDescription</td>
+                                <td>@item.CreatedDate.ToString("dd MMM yyyy")</td>
+                                <td>@item.TotalAmount.ToString("C", new System.Globalization.CultureInfo("en-ZA"))</td>
+                                <td>
+                                    <partial name="_StatusLabel" model="item.Status" />
+                                </td>
+                                <td class="text-end">
+                                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-secondary">
+                                        View <i class="fas fa-chevron-right fa-sm ms-1"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>

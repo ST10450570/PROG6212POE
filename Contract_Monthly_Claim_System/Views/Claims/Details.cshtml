@@ -1,0 +1,127 @@
+﻿@model Claim
+
+@{
+    ViewData["Title"] = $"Claim Details - {Model.ClaimNumber}";
+}
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="fas fa-file-invoice-dollar me-2"></i>Claim Details</h5>
+                <partial name="_StatusLabel" model="Model.Status" />
+            </div>
+            <div class="card-body">
+                <div class="detail-grid">
+                    <div>
+                        <div class="detail-label">Claim Number</div>
+                        <div class="detail-value">@Model.ClaimNumber</div>
+                    </div>
+                    <div>
+                        <div class="detail-label">Claimant</div>
+                        <div class="detail-value">@Model.User?.FullName</div>
+                    </div>
+                    <div>
+                        <div class="detail-label">Submitted On</div>
+                        <div class="detail-value">@(Model.SubmittedDate?.ToString("dd MMM yyyy") ?? "Not Submitted")</div>
+                    </div>
+                    <div>
+                        <div class="detail-label">Hours Worked</div>
+                        <div class="detail-value">@Model.HoursWorked hrs</div>
+                    </div>
+                    <div>
+                        <div class="detail-label">Hourly Rate</div>
+                        <div class="detail-value">@Model.HourlyRate.ToString("C", new System.Globalization.CultureInfo("en-ZA"))</div>
+                    </div>
+                    <div class="total-amount">
+                        <div class="detail-label">Total Amount</div>
+                        <div class="detail-value fw-bold">@Model.TotalAmount.ToString("C", new System.Globalization.CultureInfo("en-ZA"))</div>
+                    </div>
+                </div>
+
+                <hr class="my-4">
+                <h6><i class="fas fa-pencil-alt me-2"></i>Work Description</h6>
+                <div class="info-box">@Model.WorkDescription</div>
+
+                @if (!string.IsNullOrEmpty(Model.Notes))
+                {
+                    <h6 class="mt-3"><i class="far fa-sticky-note me-2"></i>Additional Notes</h6>
+                    <div class="info-box">@Model.Notes</div>
+                }
+
+                @if (Model.Status == ClaimStatus.Rejected)
+                {
+                    <h6 class="mt-3"><i class="fas fa-times-circle me-2 text-danger"></i>Rejection Reason</h6>
+                    <div class="info-box border-danger">@Model.RejectionReason</div>
+                }
+                @if (Model.Status == ClaimStatus.Returned || Model.Status == ClaimStatus.Verified || Model.Status == ClaimStatus.Approved)
+                {
+                    <h6 class="mt-3"><i class="fas fa-comment-dots me-2"></i>Reviewer Comments</h6>
+                    <div class="info-box">@(string.IsNullOrEmpty(Model.ReviewerComments) ? "No comments provided." : Model.ReviewerComments)</div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="fas fa-paperclip me-2"></i>Supporting Documents</h6>
+            </div>
+            <div class="card-body">
+                @if (Model.Documents != null && Model.Documents.Any())
+                {
+                    <ul class="list-unstyled mb-0">
+                        @foreach (var document in Model.Documents)
+                        {
+                            <li class="document-item">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-file-alt fa-2x me-3 text-secondary"></i>
+                                    <div class="fw-bold">@document.FileName</div>
+                                </div>
+                                <div class="document-actions">
+                                    <a asp-controller="Documents" asp-action="Download" asp-route-id="@document.Id" class="btn btn-sm btn-outline-secondary" title="Download">
+                                        <i class="fas fa-download"></i>
+                                    </a>
+                                </div>
+                            </li>
+                        }
+                    </ul>
+                }
+                else
+                {
+                    <p class="text-center text-secondary py-3">No documents uploaded.</p>
+                }
+            </div>
+        </div>
+
+        @{
+            var currentUser = UserSession.GetCurrentUser();
+            if (currentUser?.Role == UserRole.Lecturer)
+            {
+                <div class="card">
+                    <div class="card-header">
+                        <h6 class="mb-0"><i class="fas fa-bolt me-2"></i>Quick Actions</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            @if (Model.CanSubmit)
+                            {
+                                <form asp-action="Submit" method="post" class="d-grid">
+                                    <input type="hidden" name="id" value="@Model.Id" />
+                                    <button type="submit" class="btn btn-success" onclick="return confirm('Are you sure you want to submit this claim for review? This action cannot be undone.')">
+                                        <i class="fas fa-paper-plane me-1"></i> Submit for Review
+                                    </button>
+                                    <small class="text-center text-secondary mt-2">Submitting will lock the claim from further edits unless it is returned by a reviewer.</small>
+                                </form>
+                            }
+                            <a asp-action="MyClaims" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-1"></i> Back to My Claims
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+    </div>
+</div>
