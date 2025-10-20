@@ -27,6 +27,7 @@ namespace Contract_Monthly_Claim_System.Models
         public DateTime? SubmittedDate { get; set; }
         public string? RejectionReason { get; set; }
         public string? ReviewerComments { get; set; }
+        public DateTime UpdatedDate { get; set; }
 
         // Foreign Keys & Navigation Properties
         public int UserId { get; set; }

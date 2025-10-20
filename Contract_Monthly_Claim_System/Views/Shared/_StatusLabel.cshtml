@@ -1,0 +1,14 @@
+﻿@model Contract_Monthly_Claim_System.Models.ClaimStatus
+
+@{
+    var badgeClass = Model switch
+    {
+        ClaimStatus.Approved => "bg-success-soft",
+        ClaimStatus.Rejected => "bg-danger-soft",
+        ClaimStatus.Submitted => "bg-warning-soft",
+        ClaimStatus.Verified => "bg-info-soft",
+        ClaimStatus.Returned => "bg-secondary-soft",
+        _ => "bg-secondary-soft"
+    };
+}
+<span class="badge @badgeClass">@Model.ToString()</span>

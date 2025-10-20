@@ -1,11 +1,9 @@
-﻿// Data/InMemoryDataStore.cs
+﻿
 using Contract_Monthly_Claim_System.Models;
 
 namespace Contract_Monthly_Claim_System.Data
 {
-    /// <summary>
-    /// Singleton service to act as an in-memory database for the application's lifetime.
-    /// </summary>
+ 
     public class InMemoryDataStore
     {
         public List<ApplicationUser> Users { get; } = new List<ApplicationUser>();
@@ -20,14 +18,14 @@ namespace Contract_Monthly_Claim_System.Data
 
         public void SeedInitialData()
         {
-            if (Users.Any()) return; // Data already seeded
+            if (Users.Any()) return;
 
             // --- Seed Users ---
             Users.AddRange(new List<ApplicationUser>
             {
-                new ApplicationUser { Id = 1, FullName = "David Wilson", Email = "lecturer@university.com", Role = UserRole.Lecturer },
-                new ApplicationUser { Id = 2, FullName = "Sarah Johnson", Email = "coordinator@university.com", Role = UserRole.Coordinator },
-                new ApplicationUser { Id = 3, FullName = "Michael Brown", Email = "manager@university.com", Role = UserRole.Manager }
+                new ApplicationUser { Id = 1, FullName = "Chuma Makhathini", Email = "lecturer@IIEMSA.com", Role = UserRole.Lecturer , department = "Computer Science"},
+                new ApplicationUser { Id = 2, FullName = "Muzi Sithole", Email = "coordinator@IIEMSA.com", Role = UserRole.Coordinator ,  department ="Head of Cumputer Science"},
+                new ApplicationUser { Id = 3, FullName = "Ouma Stella", Email = "manager@IIEMSA.com", Role = UserRole.Manager , department = "Head of School Of IT"}
             });
         }
     }

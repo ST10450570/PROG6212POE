@@ -105,18 +105,45 @@
                     </div>
                     <div class="card-body">
                         <div class="d-grid gap-2">
-                            @if (Model.CanSubmit)
+                            @if (Model.Status == ClaimStatus.Draft || Model.Status == ClaimStatus.Returned)
+                            {
+                                <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">
+                                    <i class="fas fa-edit me-1"></i>
+                                    @(Model.Status == ClaimStatus.Returned ? "Correct Claim" : "Edit Claim")
+                                </a>
+
+                                <form asp-action="Submit" method="post" class="d-grid">
+                                    <input type="hidden" name="id" value="@Model.Id" />
+                                    <button type="submit" class="btn btn-success"
+                                            onclick="return confirm('Are you sure you want to submit this claim for review? This action cannot be undone.')">
+                                        <i class="fas fa-paper-plane me-1"></i>
+                                        @(Model.Status == ClaimStatus.Returned ? "Resubmit for Review" : "Submit for Review")
+                                    </button>
+                                    <small class="text-center text-secondary mt-2">
+                                        @if (Model.Status == ClaimStatus.Returned)
+                                        {
+                                            <text>Resubmitting will send your corrected claim back for review.</text>
+                                        }
+                                        else
+                                        {
+                                            <text>Submitting will lock the claim from further edits unless it is returned by a reviewer.</text>
+                                        }
+                                    </small>
+                                </form>
+                            }
+                            else if (Model.CanSubmit)
                             {
                                 <form asp-action="Submit" method="post" class="d-grid">
                                     <input type="hidden" name="id" value="@Model.Id" />
                                     <button type="submit" class="btn btn-success" onclick="return confirm('Are you sure you want to submit this claim for review? This action cannot be undone.')">
                                         <i class="fas fa-paper-plane me-1"></i> Submit for Review
                                     </button>
-                                    <small class="text-center text-secondary mt-2">Submitting will lock the claim from further edits unless it is returned by a reviewer.</small>
+                                    <small class="text-center text-secondary mt-2">Submitting will lock the claim from further edits unless it is returned by coordinator.</small>
                                 </form>
                             }
-                            <a asp-action="MyClaims" class="btn btn-outline-secondary">
-                                <i class="fas fa-arrow-left me-1"></i> Back to My Claims
+
+                            <a asp-action="Dashboard" class="btn btn-outline-secondary">
+								<i class="fas fa-arrow-left me-1"></i> Back to Dashboard
                             </a>
                         </div>
                     </div>

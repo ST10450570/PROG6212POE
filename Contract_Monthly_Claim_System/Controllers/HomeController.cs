@@ -29,7 +29,7 @@ namespace Contract_Monthly_Claim_System.Controllers
             // Redirect user to their default dashboard
             return user.Role switch
             {
-                Models.UserRole.Lecturer => RedirectToAction("MyClaims", "Claims"),
+                Models.UserRole.Lecturer => RedirectToAction("Dashboard", "Claims"),
                 Models.UserRole.Coordinator => RedirectToAction("PendingCoordinator", "Claims"),
                 Models.UserRole.Manager => RedirectToAction("PendingManager", "Claims"),
                 _ => RedirectToAction("Index")

@@ -16,5 +16,11 @@ namespace Contract_Monthly_Claim_System.Services
         Task ApproveClaimAsync(int claimId, string comments, int managerId);
         Task RejectClaimAsync(int claimId, string reason, int reviewerId);
         Task ReturnClaimAsync(int claimId, string comments, int coordinatorId);
+        Task<int> GetTotalClaimsCountAsync(int userId);
+        Task<int> GetApprovedClaimsCountAsync(int userId);
+        Task<int> GetPendingClaimsCountAsync(int userId);
+        Task<decimal> GetTotalApprovedAmountAsync(int userId);
+        Task<IEnumerable<Claim>> GetRecentClaimsAsync(int userId, int count);
+        Task UpdateClaimAsync(int claimId, ClaimEditViewModel viewModel, int userId);
     }
 }

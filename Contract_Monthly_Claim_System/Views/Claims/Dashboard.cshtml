@@ -1,0 +1,181 @@
+﻿@using System.Security.Claims
+@{
+    ViewData["Title"] = "Dashboard";
+    var userName = ViewBag.UserName ?? "";
+    var department = ViewBag.Department ?? "Computer Science";
+    var userRole = ViewBag.UserRole ?? "";
+    var userInitials = ViewBag.UserInitials ?? "U";
+
+    var isCoordinatorOrManager = User.IsInRole("Coordinator") || User.IsInRole("Manager");
+    var isAdministrator = User.IsInRole("Administrator");
+}
+
+<div class="dashboard-layout">
+    <aside class="sidebar">
+        <div class="sidebar-profile">
+            <div class="avatar-circle-lg">
+                <span class="avatar-initials-lg">@userInitials</span>
+            </div>
+            <h5 class="mt-2 mb-0">@userName</h5>
+            <small class="text-secondary">@department</small>
+            <div class="badge mt-1" style="background-color: var(--accent-color); color: white;">@userRole</div>
+        </div>
+
+    </aside>
+
+    <main class="main-content">
+        <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-4 border-bottom-themed">
+            <h1 class="h2">Dashboard Overview</h1>
+            <a asp-action="Create" asp-controller="Claims" class="btn btn-primary">
+                <i class="fas fa-plus me-1"></i> New Claim
+            </a>
+        </div>
+
+        <div class="row">
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card stat-card">
+                    <div class="stat-card-icon" style="background-color: var(--accent-glow); color: var(--accent-color);">
+                        <i class="fas fa-file-invoice"></i>
+                    </div>
+                    <div>
+                        <div class="stat-label">Total Claims</div>
+                        <div class="stat-value" id="totalClaims">...</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card stat-card">
+                    <div class="stat-card-icon" style="background-color: hsla(145, 63%, 42%, 0.1); color: var(--success-color);">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div>
+                        <div class="stat-label">Approved</div>
+                        <div class="stat-value" id="approvedClaims">...</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card stat-card">
+                    <div class="stat-card-icon" style="background-color: hsla(38, 92%, 50%, 0.1); color: var(--warning-color);">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div>
+                        <div class="stat-label">Pending</div>
+                        <div class="stat-value" id="pendingClaims">...</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card stat-card">
+                    <div class="stat-card-icon" style="background-color: hsla(225, 85%, 60%, 0.15); color: var(--accent-color);">
+                        <i class="fas fa-coins"></i>
+                    </div>
+                    <div>
+                        <div class="stat-label">Approved Value</div>
+                        <div class="stat-value" id="totalAmount">...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-history me-2"></i>Recent Claims</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive" id="recentClaimsTable">
+                    <div class="text-center p-4 text-secondary">
+                        <div class="spinner-border spinner-border-sm" role="status"></div>
+                        <span class="ms-2">Loading recent claims...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            loadDashboardStats();
+            loadRecentClaims();
+        });
+
+        function formatCurrency(value) {
+            return new Intl.NumberFormat('en-ZA', { style: 'currency', currency: 'ZAR' }).format(value);
+        }
+
+        function loadDashboardStats() {
+            $.get('@Url.Action("GetDashboardStats", "Claims")', function (data) {
+                if(data && !data.error) {
+                    $('#totalClaims').text(data.totalClaims || '0');
+                    $('#approvedClaims').text(data.approvedClaims || '0');
+                    $('#pendingClaims').text(data.pendingClaims || '0');
+                    $('#totalAmount').text(formatCurrency(data.totalAmount || 0));
+                } else {
+                    $('.stat-value').text('Error');
+                }
+            }).fail(function() {
+                $('.stat-value').text('Error');
+            });
+        }
+
+        function loadRecentClaims() {
+            $.get('@Url.Action("GetRecentClaims", "Claims")', function (data) {
+                const tableContainer = $('#recentClaimsTable');
+                if (data && !data.error && data.length > 0) {
+                    let tableHtml = `
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Claim #</th>
+                                    <th>Description</th>
+                                    <th>Period</th>
+                                    <th>Amount</th>
+                                    <th>Status</th>
+                                    <th>Submitted On</th>
+                                </tr>
+                            </thead>
+                            <tbody>`;
+
+                    data.forEach(function(claim) {
+                        let statusBadge;
+                        switch(claim.status.toLowerCase()) {
+                            case 'approved': statusBadge = '<span class="badge bg-success-soft">Approved</span>'; break;
+                            case 'rejected': statusBadge = '<span class="badge bg-danger-soft">Rejected</span>'; break;
+                            case 'submitted': statusBadge = '<span class="badge bg-warning-soft">Submitted</span>'; break;
+                            case 'returned': statusBadge = '<span class="badge bg-secondary-soft">Returned</span>'; break;
+                            case 'draft': statusBadge = '<span class="badge bg-info-soft">Draft</span>'; break;
+                            case 'verified': statusBadge = '<span class="badge bg-primary-soft">Verified</span>'; break;
+                            default: statusBadge = `<span class="badge bg-secondary-soft">${claim.status}</span>`;
+                        }
+
+                        // Handle the description - truncate if too long
+                        const description = claim.workDescription || 'No description';
+                        const shortDescription = description.length > 50 ?
+                            description.substring(0, 50) + '...' : description;
+
+                        tableHtml += `
+                            <tr style="cursor: pointer;" onclick="window.location.href='/Claims/Details/${claim.claimId}'">
+                                <td class="fw-bold">${claim.claimNumber}</td>
+                                <td title="${description.replace(/"/g, '&quot;')}">${shortDescription}</td>
+                                <td>${claim.period}</td>
+                                <td>${formatCurrency(claim.totalAmount)}</td>
+                                <td>${statusBadge}</td>
+                                <td>${new Date(claim.claimDate).toLocaleDateString()}</td>
+                            </tr>`;
+                    });
+
+                    tableHtml += '</tbody></table>';
+                    tableContainer.html(tableHtml);
+                } else if (data && data.error) {
+                    tableContainer.html('<p class="text-center p-4 text-danger">Error loading recent claims: ' + data.error + '</p>');
+                } else {
+                    tableContainer.html('<p class="text-center p-4 text-secondary">No recent claims found.</p>');
+                }
+            }).fail(function(xhr, status, error) {
+                $('#recentClaimsTable').html('<p class="text-center p-4 text-danger">Error loading recent claims: ' + error + '</p>');
+            });
+        }
+    </script>
+}

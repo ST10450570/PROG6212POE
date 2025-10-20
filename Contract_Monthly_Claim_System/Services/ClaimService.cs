@@ -150,5 +150,76 @@ namespace Contract_Monthly_Claim_System.Services
             claim.Status = ClaimStatus.Returned;
             claim.ReviewerComments = comments;
         }
+
+        public async Task<int> GetTotalClaimsCountAsync(int userId)
+        {
+            return await Task.FromResult(
+                _dataStore.Claims.Where(c => c.UserId == userId).Count()
+            );
+        }
+
+        public async Task<int> GetApprovedClaimsCountAsync(int userId)
+        {
+            return await Task.FromResult(
+                _dataStore.Claims.Where(c => c.UserId == userId && c.Status == ClaimStatus.Approved).Count()
+            );
+        }
+
+        public async Task<int> GetPendingClaimsCountAsync(int userId)
+        {
+            return await Task.FromResult(
+                _dataStore.Claims.Where(c => c.UserId == userId &&
+                    (c.Status == ClaimStatus.Submitted || c.Status == ClaimStatus.Verified)).Count()
+            );
+        }
+
+        public async Task<decimal> GetTotalApprovedAmountAsync(int userId)
+        {
+            return await Task.FromResult(
+                _dataStore.Claims.Where(c => c.UserId == userId && c.Status == ClaimStatus.Approved)
+                    .Sum(c => c.TotalAmount)
+            );
+        }
+
+        public async Task<IEnumerable<Claim>> GetRecentClaimsAsync(int userId, int count = 10)
+        {
+            return await Task.FromResult(
+                _dataStore.Claims.Where(c => c.UserId == userId)
+                    .OrderByDescending(c => c.CreatedDate)
+                    .Take(count)
+                    .ToList()
+            );
+        }
+
+        public async Task UpdateClaimAsync(int claimId, ClaimEditViewModel viewModel, int userId)
+        {
+            var claim = _dataStore.Claims
+                .FirstOrDefault(c => c.Id == claimId && c.UserId == userId);
+
+            if (claim == null)
+                throw new InvalidOperationException("Claim not found.");
+
+            // Allow editing for both Draft and Returned status
+            if (claim.Status != ClaimStatus.Draft && claim.Status != ClaimStatus.Returned)
+                throw new InvalidOperationException("Only draft and returned claims can be edited.");
+
+            claim.WorkDescription = viewModel.WorkDescription;
+            claim.HoursWorked = viewModel.HoursWorked;
+            claim.HourlyRate = viewModel.HourlyRate;
+            claim.Notes = viewModel.Notes;
+            claim.TotalAmount = viewModel.HoursWorked * viewModel.HourlyRate;
+            claim.UpdatedDate = DateTime.UtcNow;
+
+            // If claim was returned and is being edited, change status back to Draft
+            if (claim.Status == ClaimStatus.Returned)
+            {
+                claim.Status = ClaimStatus.Draft;
+                // Clear previous reviewer comments since we're making corrections
+                claim.ReviewerComments = null;
+            }
+
+            // No SaveChangesAsync needed for in-memory data store
+            await Task.CompletedTask;
+        }
     }
 }

@@ -10,5 +10,6 @@ namespace Contract_Monthly_Claim_System.Models
         public required string Email { get; set; }
         public UserRole Role { get; set; }
         public string Initials => string.Concat(FullName.Split(' ').Select(n => n[0])).ToUpper();
+        public required string department { get; set; }
     }
 }

@@ -6,11 +6,22 @@ var builder = WebApplication.CreateBuilder(args);
 
 // --- Add services to the container ---
 
-// Add MVC services
 builder.Services.AddControllersWithViews();
 
 // Add HttpContextAccessor to access session/connection info in services
 builder.Services.AddHttpContextAccessor();
+
+// --- ADD THIS ---
+// 1. Add session services to the dependency injection container
+builder.Services.AddSession(options =>
+{
+    // You can configure session options here, e.g., timeout
+    options.IdleTimeout = TimeSpan.FromMinutes(30);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+});
+// --- END ADD ---
+
 
 // Register application services with Dependency Injection
 // Scoped: A new instance is created for each web request.
@@ -18,7 +29,6 @@ builder.Services.AddScoped<IClaimService, ClaimService>();
 builder.Services.AddScoped<IUserSessionService, UserSessionService>();
 
 // Singleton: A single instance is created for the application's lifetime.
-// Good for services that are stateless or manage a shared state, like our in-memory store and encryption service.
 builder.Services.AddSingleton<InMemoryDataStore>();
 builder.Services.AddSingleton<IFileEncryptionService, FileEncryptionService>();
 
@@ -30,7 +40,6 @@ var app = builder.Build();
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
@@ -38,6 +47,12 @@ app.UseHttpsRedirection();
 app.UseStaticFiles(); // Enables serving files from wwwroot
 
 app.UseRouting();
+
+// --- ADD THIS ---
+// 2. Enable the session middleware
+// This MUST be called *after* UseRouting() and *before* UseAuthorization() and MapControllerRoute().
+app.UseSession();
+// --- END ADD ---
 
 app.UseAuthorization();
 
