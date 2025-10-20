@@ -1,16 +1,16 @@
-using System.Diagnostics;
-using Contract_Monthly_Claim_System.Models;
+// Controllers/HomeController.cs
+using Contract_Monthly_Claim_System.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Contract_Monthly_Claim_System.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly ILogger<HomeController> _logger;
+        private readonly IUserSessionService _userSessionService;
 
-        public HomeController(ILogger<HomeController> logger)
+        public HomeController(IUserSessionService userSessionService)
         {
-            _logger = logger;
+            _userSessionService = userSessionService;
         }
 
         public IActionResult Index()
@@ -18,15 +18,28 @@ namespace Contract_Monthly_Claim_System.Controllers
             return View();
         }
 
-        public IActionResult Privacy()
+        [HttpPost]
+        public IActionResult SetUser(int userId)
         {
-            return View();
+            _userSessionService.SetCurrentUser(userId);
+            var user = _userSessionService.GetCurrentUser();
+
+            if (user == null) return RedirectToAction("Index");
+
+            // Redirect user to their default dashboard
+            return user.Role switch
+            {
+                Models.UserRole.Lecturer => RedirectToAction("MyClaims", "Claims"),
+                Models.UserRole.Coordinator => RedirectToAction("PendingCoordinator", "Claims"),
+                Models.UserRole.Manager => RedirectToAction("PendingManager", "Claims"),
+                _ => RedirectToAction("Index")
+            };
         }
 
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
+        public IActionResult Logout()
         {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+            _userSessionService.ClearCurrentUser();
+            return RedirectToAction("Index");
         }
     }
 }

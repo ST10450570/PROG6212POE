@@ -3,6 +3,14 @@
   "WorkspaceRootPath": "C:\\Users\\lab_services_student\\Documents\\PROG6212POE\\Contract_Monthly_Claim_System\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{AF15B08C-FC7B-4D0A-8861-67237BF3EED9}|Contract_Monthly_Claim_System.csproj|c:\\users\\lab_services_student\\documents\\prog6212poe\\contract_monthly_claim_system\\controllers\\homecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{AF15B08C-FC7B-4D0A-8861-67237BF3EED9}|Contract_Monthly_Claim_System.csproj|solutionrelative:controllers\\homecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{AF15B08C-FC7B-4D0A-8861-67237BF3EED9}|Contract_Monthly_Claim_System.csproj|c:\\users\\lab_services_student\\documents\\prog6212poe\\contract_monthly_claim_system\\services\\claimservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{AF15B08C-FC7B-4D0A-8861-67237BF3EED9}|Contract_Monthly_Claim_System.csproj|solutionrelative:services\\claimservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{AF15B08C-FC7B-4D0A-8861-67237BF3EED9}|Contract_Monthly_Claim_System.csproj|c:\\users\\lab_services_student\\documents\\prog6212poe\\contract_monthly_claim_system\\services\\iclaimservices.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{AF15B08C-FC7B-4D0A-8861-67237BF3EED9}|Contract_Monthly_Claim_System.csproj|solutionrelative:services\\iclaimservices.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
@@ -71,19 +79,45 @@
             {
               "$type": "Document",
               "DocumentIndex": 0,
+              "Title": "HomeController.cs",
+              "DocumentMoniker": "C:\\Users\\lab_services_student\\Documents\\PROG6212POE\\Contract_Monthly_Claim_System\\Controllers\\HomeController.cs",
+              "RelativeDocumentMoniker": "Controllers\\HomeController.cs",
+              "ToolTip": "C:\\Users\\lab_services_student\\Documents\\PROG6212POE\\Contract_Monthly_Claim_System\\Controllers\\HomeController.cs",
+              "RelativeToolTip": "Controllers\\HomeController.cs",
+              "ViewState": "AgIAAAwAAAAAAAAAAAAAwCwAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-20T12:52:05.454Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "ClaimService.cs",
+              "DocumentMoniker": "C:\\Users\\lab_services_student\\Documents\\PROG6212POE\\Contract_Monthly_Claim_System\\Services\\ClaimService.cs",
+              "RelativeDocumentMoniker": "Services\\ClaimService.cs",
+              "ToolTip": "C:\\Users\\lab_services_student\\Documents\\PROG6212POE\\Contract_Monthly_Claim_System\\Services\\ClaimService.cs",
+              "RelativeToolTip": "Services\\ClaimService.cs",
+              "ViewState": "AgIAAHkAAAAAAAAAAAAAwJkAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-20T12:51:41.725Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
               "Title": "IClaimServices.cs",
               "DocumentMoniker": "C:\\Users\\lab_services_student\\Documents\\PROG6212POE\\Contract_Monthly_Claim_System\\Services\\IClaimServices.cs",
               "RelativeDocumentMoniker": "Services\\IClaimServices.cs",
               "ToolTip": "C:\\Users\\lab_services_student\\Documents\\PROG6212POE\\Contract_Monthly_Claim_System\\Services\\IClaimServices.cs",
               "RelativeToolTip": "Services\\IClaimServices.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABMAAAABAAAAAAAAAA==",
+              "ViewState": "AgIAAAgAAAAAAAAAAAAQwBMAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-10-20T12:49:52.471Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 3,
               "Title": "FileEncryptionService.cs",
               "DocumentMoniker": "C:\\Users\\lab_services_student\\Documents\\PROG6212POE\\Contract_Monthly_Claim_System\\Services\\FileEncryptionService.cs",
               "RelativeDocumentMoniker": "Services\\FileEncryptionService.cs",
@@ -91,12 +125,11 @@
               "RelativeToolTip": "Services\\FileEncryptionService.cs",
               "ViewState": "AgIAAA0AAAAAAAAAAAAAwC0AAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-20T12:48:30.839Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-10-20T12:48:30.839Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 4,
               "Title": "IFileEncryptionService.cs",
               "DocumentMoniker": "C:\\Users\\lab_services_student\\Documents\\PROG6212POE\\Contract_Monthly_Claim_System\\Services\\IFileEncryptionService.cs",
               "RelativeDocumentMoniker": "Services\\IFileEncryptionService.cs",
@@ -104,12 +137,11 @@
               "RelativeToolTip": "Services\\IFileEncryptionService.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-20T12:47:24.258Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-10-20T12:47:24.258Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 5,
               "Title": "UserSessionService.cs",
               "DocumentMoniker": "C:\\Users\\lab_services_student\\Documents\\PROG6212POE\\Contract_Monthly_Claim_System\\Services\\UserSessionService.cs",
               "RelativeDocumentMoniker": "Services\\UserSessionService.cs",
@@ -117,12 +149,11 @@
               "RelativeToolTip": "Services\\UserSessionService.cs",
               "ViewState": "AgIAAAIAAAAAAAAAAAAAwCIAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-20T12:46:47.397Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-10-20T12:46:47.397Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 6,
               "Title": "IUserSessionService.cs",
               "DocumentMoniker": "C:\\Users\\lab_services_student\\Documents\\PROG6212POE\\Contract_Monthly_Claim_System\\Services\\IUserSessionService.cs",
               "RelativeDocumentMoniker": "Services\\IUserSessionService.cs",
@@ -130,12 +161,11 @@
               "RelativeToolTip": "Services\\IUserSessionService.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-20T12:46:20.728Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-10-20T12:46:20.728Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 7,
               "Title": "InMemoryDataStore.cs",
               "DocumentMoniker": "C:\\Users\\lab_services_student\\Documents\\PROG6212POE\\Contract_Monthly_Claim_System\\Data\\InMemoryDataStore.cs",
               "RelativeDocumentMoniker": "Data\\InMemoryDataStore.cs",
@@ -143,12 +173,11 @@
               "RelativeToolTip": "Data\\InMemoryDataStore.cs",
               "ViewState": "AgIAAAEAAAAAAAAAAAAAwCEAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-20T12:45:43.231Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-10-20T12:45:43.231Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 6,
+              "DocumentIndex": 8,
               "Title": "MaxFileSizeAttribute.cs",
               "DocumentMoniker": "C:\\Users\\lab_services_student\\Documents\\PROG6212POE\\Contract_Monthly_Claim_System\\Validation\\MaxFileSizeAttribute.cs",
               "RelativeDocumentMoniker": "Validation\\MaxFileSizeAttribute.cs",
@@ -156,12 +185,11 @@
               "RelativeToolTip": "Validation\\MaxFileSizeAttribute.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAB4AAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-20T12:44:46.761Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-10-20T12:44:46.761Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 7,
+              "DocumentIndex": 9,
               "Title": "AllowedExtensionAttribute.cs",
               "DocumentMoniker": "C:\\Users\\lab_services_student\\Documents\\PROG6212POE\\Contract_Monthly_Claim_System\\Validation\\AllowedExtensionAttribute.cs",
               "RelativeDocumentMoniker": "Validation\\AllowedExtensionAttribute.cs",
@@ -169,12 +197,11 @@
               "RelativeToolTip": "Validation\\AllowedExtensionAttribute.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAB8AAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-20T12:43:59.839Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-10-20T12:43:59.839Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 8,
+              "DocumentIndex": 10,
               "Title": "ClaimCreateViewModel.cs",
               "DocumentMoniker": "C:\\Users\\lab_services_student\\Documents\\PROG6212POE\\Contract_Monthly_Claim_System\\ViewModels\\ClaimCreateViewModel.cs",
               "RelativeDocumentMoniker": "ViewModels\\ClaimCreateViewModel.cs",
@@ -182,12 +209,11 @@
               "RelativeToolTip": "ViewModels\\ClaimCreateViewModel.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAwCAAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-20T12:41:21.029Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-10-20T12:41:21.029Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 9,
+              "DocumentIndex": 11,
               "Title": "Document.cs",
               "DocumentMoniker": "C:\\Users\\lab_services_student\\Documents\\PROG6212POE\\Contract_Monthly_Claim_System\\Models\\Document.cs",
               "RelativeDocumentMoniker": "Models\\Document.cs",
@@ -199,7 +225,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 10,
+              "DocumentIndex": 12,
               "Title": "Claim.cs",
               "DocumentMoniker": "C:\\Users\\lab_services_student\\Documents\\PROG6212POE\\Contract_Monthly_Claim_System\\Models\\Claim.cs",
               "RelativeDocumentMoniker": "Models\\Claim.cs",
@@ -211,7 +237,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 11,
+              "DocumentIndex": 13,
               "Title": "ApplicationUser.cs",
               "DocumentMoniker": "C:\\Users\\lab_services_student\\Documents\\PROG6212POE\\Contract_Monthly_Claim_System\\Models\\ApplicationUser.cs",
               "RelativeDocumentMoniker": "Models\\ApplicationUser.cs",
@@ -223,7 +249,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 12,
+              "DocumentIndex": 14,
               "Title": "Enums.cs",
               "DocumentMoniker": "C:\\Users\\lab_services_student\\Documents\\PROG6212POE\\Contract_Monthly_Claim_System\\Models\\Enums.cs",
               "RelativeDocumentMoniker": "Models\\Enums.cs",
@@ -235,7 +261,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 13,
+              "DocumentIndex": 15,
               "Title": "Program.cs",
               "DocumentMoniker": "C:\\Users\\lab_services_student\\Documents\\PROG6212POE\\Contract_Monthly_Claim_System\\Program.cs",
               "RelativeDocumentMoniker": "Program.cs",
