@@ -1,0 +1,58 @@
+# This workflow builds and tests a .NET solution, including code coverage.
+# It's triggered on pushes and pull requests to the 'main' branch.
+
+name: Build and Test .NET Project
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+    # 1. Check out the repository code
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    # 2. Set up the specified .NET SDK version
+    - name: Setup .NET 8.0
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 8.0.x
+
+    # 3. Cache NuGet packages to speed up subsequent builds
+    - name: Cache NuGet packages
+      uses: actions/cache@v4
+      with:
+        path: ~/.nuget/packages
+        # The cache key is based on the hash of the solution's lock file.
+        # This ensures the cache is invalidated when dependencies change.
+        key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-nuget-
+
+    # 4. Restore dependencies for the entire solution
+    # Note: Replace 'Contract_Monthly_Claim_System.sln' if your solution file has a different name.
+    - name: Restore dependencies
+      run: dotnet restore Contract_Monthly_Claim_System.sln
+
+    # 5. Build the solution in Release configuration without restoring again
+    - name: Build solution
+      run: dotnet build Contract_Monthly_Claim_System.sln --configuration Release --no-restore
+
+    # 6. Run tests and collect code coverage
+    # This command runs tests and uses coverlet to generate a coverage report in Cobertura format.
+    - name: Run tests with code coverage
+      run: dotnet test Contract_Monthly_Claim_System.sln --configuration Release --no-build --verbosity normal --collect:"XPlat Code Coverage" --results-directory ./coverage
+
+    # 7. Upload the coverage report as an artifact
+    # This allows you to download and view the coverage report from the GitHub Actions run summary.
+    - name: Upload coverage report
+      uses: actions/upload-artifact@v4
+      with:
+        name: code-coverage-report
+        path: ./coverage
