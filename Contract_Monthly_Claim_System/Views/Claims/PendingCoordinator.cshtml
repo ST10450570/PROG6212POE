@@ -69,13 +69,14 @@
     </div>
 </div>
 
-<div class="modal fade" id="actionModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
+<!-- Modal with higher z-index and proper backdrop configuration -->
+<div class="modal fade" id="actionModal" tabindex="-1" aria-labelledby="actionModalLabel" aria-hidden="true" data-bs-backdrop="static" style="z-index: 1060;">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="z-index: 1061;">
             <form method="post">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="actionModalTitle"></h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <h5 class="modal-title" id="actionModalTitle">Action Required</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <p>You are about to <strong id="actionName"></strong> claim <strong id="actionClaimNumber"></strong>.</p>
@@ -91,18 +92,47 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn" id="actionSubmitButton"></button>
+                    <button type="submit" class="btn" id="actionSubmitButton">Confirm</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
 
+@section Styles {
+    <style>
+        /* Ensure modal backdrop appears correctly */
+        .modal-backdrop {
+            z-index: 1055 !important;
+        }
+
+        /* Ensure modal content is on top */
+        .modal {
+            z-index: 1060 !important;
+        }
+    </style>
+}
+
 @section Scripts {
     <script>
-        // Use site.js for this logic
-        document.getElementById('actionModal').addEventListener('show.bs.modal', function (event) {
-            setupActionModal(event);
+        document.addEventListener('DOMContentLoaded', function() {
+            const actionModal = document.getElementById('actionModal');
+
+            if (actionModal) {
+                actionModal.addEventListener('show.bs.modal', function (event) {
+                    setupActionModal(event);
+                });
+
+                // Additional cleanup when modal is hidden
+                actionModal.addEventListener('hidden.bs.modal', function () {
+                    // Clear any required fields that might prevent form submission
+                    const textarea = actionModal.querySelector('textarea[name="comments"]');
+                    const reasonInput = actionModal.querySelector('input[name="reason"]');
+
+                    if (textarea) textarea.required = false;
+                    if (reasonInput) reasonInput.required = false;
+                });
+            }
         });
     </script>
 }

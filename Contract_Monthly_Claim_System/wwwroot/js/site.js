@@ -21,7 +21,6 @@ $(document).ready(function () {
         calculateTotal();
     }
 
-
     // --- File Upload Feedback ---
     $('#fileUpload').on('change', function () {
         const fileName = $(this).val().split('\\').pop();
@@ -55,12 +54,15 @@ function setupActionModal(event) {
     const reasonInput = modal.querySelector('input[name="reason"]');
     const commentsLabel = modal.querySelector('#comments-label');
 
-
-    // Reset form fields
+    // Reset form fields and visibility
     commentsInput.value = '';
     reasonInput.value = '';
     commentsInput.required = false;
     reasonInput.required = false;
+
+    // Reset all sections to default state
+    commentsSection.style.display = 'block';
+    reasonSection.style.display = 'none';
 
     // Set common values
     claimIdInput.value = claimId;
@@ -77,9 +79,8 @@ function setupActionModal(event) {
             actionName.textContent = 'verify';
             submitButton.textContent = 'Verify Claim';
             submitButton.classList.add('btn-success');
-            commentsSection.style.display = 'block';
-            reasonSection.style.display = 'none';
             commentsLabel.textContent = "Comments (Optional)";
+            commentsInput.required = false;
             break;
         case 'Return':
             form.action = `/Claims/Return`;
@@ -87,8 +88,6 @@ function setupActionModal(event) {
             actionName.textContent = 'return';
             submitButton.textContent = 'Return for Correction';
             submitButton.classList.add('btn-warning');
-            commentsSection.style.display = 'block';
-            reasonSection.style.display = 'none';
             commentsLabel.textContent = "Correction Instructions *";
             commentsInput.required = true;
             break;
@@ -98,9 +97,8 @@ function setupActionModal(event) {
             actionName.textContent = 'approve';
             submitButton.textContent = 'Approve Claim';
             submitButton.classList.add('btn-success');
-            commentsSection.style.display = 'block';
-            reasonSection.style.display = 'none';
             commentsLabel.textContent = "Comments (Optional)";
+            commentsInput.required = false;
             break;
         case 'Reject':
             form.action = `/Claims/Reject`;
@@ -108,9 +106,17 @@ function setupActionModal(event) {
             actionName.textContent = 'reject';
             submitButton.textContent = 'Reject Claim';
             submitButton.classList.add('btn-danger');
-            commentsSection.style.display = 'none'; // Rejection uses the reason field
+            commentsSection.style.display = 'none';
             reasonSection.style.display = 'block';
             reasonInput.required = true;
             break;
     }
+
+    // Ensure modal is properly positioned and visible
+    setTimeout(() => {
+        const modalInstance = bootstrap.Modal.getInstance(modal);
+        if (modalInstance) {
+            modalInstance.handleUpdate();
+        }
+    }, 50);
 }
