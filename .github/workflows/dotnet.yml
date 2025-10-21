@@ -1,4 +1,4 @@
-# This workflow builds and tests a .NET solution, including code coverage.
+# This workflow builds and tests a .NET solution located in a sub-folder.
 # It's triggered on pushes and pull requests to the 'main' branch.
 
 name: Build and Test .NET Project
@@ -12,6 +12,11 @@ on:
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
+
+    # Set a default working directory for all subsequent steps in this job
+    defaults:
+      run:
+        working-directory: ./Contract_Monthly_Claim_System
 
     steps:
     # 1. Check out the repository code
@@ -29,30 +34,39 @@ jobs:
       uses: actions/cache@v4
       with:
         path: ~/.nuget/packages
-        # The cache key is based on the hash of the solution's lock file.
-        # This ensures the cache is invalidated when dependencies change.
         key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
         restore-keys: |
           ${{ runner.os }}-nuget-
 
     # 4. Restore dependencies for the entire solution
-    # Note: Replace 'Contract_Monthly_Claim_System.sln' if your solution file has a different name.
+    # This now runs inside the './Contract_Monthly_Claim_System' directory
     - name: Restore dependencies
       run: dotnet restore Contract_Monthly_Claim_System.sln
 
-    # 5. Build the solution in Release configuration without restoring again
+    # 5. Build the solution in Release configuration
     - name: Build solution
       run: dotnet build Contract_Monthly_Claim_System.sln --configuration Release --no-restore
 
     # 6. Run tests and collect code coverage
-    # This command runs tests and uses coverlet to generate a coverage report in Cobertura format.
+    # The results-directory will now be created inside the working directory
     - name: Run tests with code coverage
       run: dotnet test Contract_Monthly_Claim_System.sln --configuration Release --no-build --verbosity normal --collect:"XPlat Code Coverage" --results-directory ./coverage
 
     # 7. Upload the coverage report as an artifact
-    # This allows you to download and view the coverage report from the GitHub Actions run summary.
     - name: Upload coverage report
       uses: actions/upload-artifact@v4
       with:
         name: code-coverage-report
-        path: ./coverage
+        # The path is now relative to the root, so we specify the full path
+        path: ./Contract_Monthly_Claim_System/coverage/
+```
+
+### Key Changes and Why They Work
+
+1.  **`defaults` Block:** I've added a `defaults` section at the job level:
+    ```yaml
+    defaults:
+      run:
+        working-directory: ./Contract_Monthly_Claim_System
+    
+
