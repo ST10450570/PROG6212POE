@@ -1,4 +1,7 @@
-/* MODERN FUTURISTIC THEME WITH DARK MODE & 3D ELEMENTS */
+/* ============================================
+   MODERN FUTURISTIC THEME WITH DARK MODE & 3D ELEMENTS
+   INCLUDING MODAL FIXES
+   ============================================ */
 
 /* -- THEME VARIABLES -- */
 :root {
@@ -54,6 +57,7 @@ html {
     font-size: 16px;
     height: 100%;
     position: relative;
+    scroll-behavior: smooth;
 }
 
 body {
@@ -67,6 +71,7 @@ body {
     display: flex;
     flex-direction: column;
     transition: background-color 0.3s ease, color 0.3s ease;
+    overflow-x: hidden;
 }
 
 /* -- FIXED HEADER & FOOTER LAYOUT -- */
@@ -75,7 +80,7 @@ header {
     top: 0;
     left: 0;
     right: 0;
-    z-index: 1030; /* High z-index to stay above everything */
+    z-index: 1030;
     width: 100%;
 }
 
@@ -84,16 +89,16 @@ footer {
     bottom: 0;
     left: 0;
     right: 0;
-    z-index: 1030; /* High z-index to stay above everything */
+    z-index: 1030;
     width: 100%;
-    margin-top: auto; /* Push footer to bottom in flex layout */
+    margin-top: auto;
 }
 
 /* Main content area - ensures content doesn't go under header/footer */
 .main-container {
     flex: 1;
     width: 100%;
-    padding: 6rem 0 4rem 0; /* Top padding for header, bottom for footer */
+    padding: 6rem 0 4rem 0;
     margin: 0 auto;
     max-width: 100%;
     position: relative;
@@ -104,7 +109,7 @@ footer {
 main {
     position: relative;
     z-index: 1;
-    min-height: calc(100vh - 140px); /* Adjust based on header/footer height */
+    min-height: calc(100vh - 140px);
 }
 
 /* Navbar with Fixed Positioning */
@@ -120,7 +125,7 @@ main {
     left: 0;
     right: 0;
     z-index: 1030;
-    height: 70px; /* Fixed height */
+    height: 70px;
 }
 
 .navbar-brand, .nav-link {
@@ -142,7 +147,7 @@ main {
     border-top: 1px solid var(--border-color);
     box-shadow: var(--shadow-2);
     color: var(--text-secondary);
-    height: 60px; /* Fixed height */
+    height: 60px;
     display: flex;
     align-items: center;
     position: fixed;
@@ -164,7 +169,7 @@ main {
     display: grid;
     grid-template-columns: 280px 1fr;
     gap: 2rem;
-    min-height: calc(100vh - 140px); /* Account for header + footer */
+    min-height: calc(100vh - 140px);
     padding: 0;
 }
 
@@ -577,7 +582,7 @@ main {
     border: 1px solid var(--border-color);
     height: fit-content;
     position: sticky;
-    top: 90px; /* Below navbar */
+    top: 90px;
 }
 
 .sidebar-profile {
@@ -632,6 +637,98 @@ main {
     box-shadow: var(--shadow-2);
 }
 
+/* ============================================
+   MODAL FIXES
+   ============================================ */
+
+/* Critical: Ensure modal backdrop doesn't block interactions */
+.modal-backdrop {
+    z-index: 9998 !important;
+    pointer-events: none !important;
+}
+
+/* Modal must be above backdrop */
+.modal {
+    z-index: 9999 !important;
+    pointer-events: none !important;
+}
+
+/* But modal dialog and its contents ARE interactive */
+.modal-dialog {
+    pointer-events: auto !important;
+    z-index: 10000 !important;
+}
+
+.modal-content {
+    pointer-events: auto !important;
+    z-index: 10001 !important;
+}
+
+/* Ensure all interactive elements work */
+.modal input,
+.modal textarea,
+.modal select,
+.modal button,
+.modal .btn,
+.modal .btn-close,
+.modal .form-control {
+    pointer-events: auto !important;
+    position: relative;
+    z-index: 10002;
+}
+
+/* Prevent body scroll when modal is open */
+body.modal-open {
+    overflow: hidden !important;
+    padding-right: 0 !important;
+}
+
+    /* Fix for fixed header/footer - keep them below modal */
+    body.modal-open .navbar,
+    body.modal-open .footer {
+        z-index: 1030 !important;
+    }
+
+/* Ensure modal is centered and visible */
+.modal.show {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Fix backdrop opacity */
+.modal-backdrop.show {
+    opacity: 0;
+}
+
+/* Ensure modal can be clicked anywhere inside */
+.modal-header,
+.modal-body,
+.modal-footer {
+    pointer-events: auto !important;
+}
+
+/* Additional modal styling for better UX */
+.modal-dialog-centered {
+    min-height: calc(100% - 3.5rem);
+}
+
+/* Fix scrolling within modal */
+.modal-body {
+    max-height: calc(100vh - 200px);
+    overflow-y: auto;
+}
+
+/* Ensure form elements are clickable */
+.modal form {
+    pointer-events: auto !important;
+}
+
+.modal label {
+    pointer-events: none;
+    cursor: text;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
     .dashboard-layout {
@@ -666,10 +763,11 @@ main {
     }
 }
 
-/* Smooth scrolling */
-html {
-    scroll-behavior: smooth;
-    height: 100%;
+/* Additional safety for long content */
+@media (min-height: 800px) {
+    .main-container {
+        padding: 7rem 0 5rem 0;
+    }
 }
 
 /* Focus states for accessibility */
@@ -695,15 +793,3 @@ html {
     ::-webkit-scrollbar-thumb:hover {
         background: hsl(225, 85%, 65%);
     }
-
-/* Ensure no content overlaps with fixed elements */
-body {
-    overflow-x: hidden;
-}
-
-/* Additional safety for long content */
-@media (min-height: 800px) {
-    .main-container {
-        padding: 7rem 0 5rem 0;
-    }
-}

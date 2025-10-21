@@ -30,29 +30,49 @@ $(document).ready(function () {
             $('#file-upload-feedback').text('');
         }
     });
-
 });
 
-// --- Generic Modal Handler for Reviewer Actions ---
+// --- IMPROVED Modal Handler for Reviewer Actions ---
 function setupActionModal(event) {
+    console.log('setupActionModal called');
+
     const button = event.relatedTarget;
+    if (!button) {
+        console.error('No button found in event');
+        return;
+    }
+
     const actionType = button.getAttribute('data-action-type');
     const claimId = button.getAttribute('data-claim-id');
     const claimNumber = button.getAttribute('data-claim-number');
 
+    console.log('Action:', actionType, 'Claim:', claimNumber);
+
     const modal = document.getElementById('actionModal');
+    if (!modal) {
+        console.error('Modal element not found');
+        return;
+    }
+
     const form = modal.querySelector('form');
     const modalTitle = modal.querySelector('.modal-title');
     const actionName = modal.querySelector('#actionName');
     const claimNumberSpan = modal.querySelector('#actionClaimNumber');
     const claimIdInput = modal.querySelector('#actionClaimId');
     const submitButton = modal.querySelector('#actionSubmitButton');
-
     const commentsSection = modal.querySelector('#comments-section');
     const reasonSection = modal.querySelector('#reason-section');
     const commentsInput = modal.querySelector('textarea[name="comments"]');
     const reasonInput = modal.querySelector('input[name="reason"]');
     const commentsLabel = modal.querySelector('#comments-label');
+
+    // Verify all elements exist
+    if (!form || !modalTitle || !actionName || !claimNumberSpan || !claimIdInput ||
+        !submitButton || !commentsSection || !reasonSection || !commentsInput ||
+        !reasonInput || !commentsLabel) {
+        console.error('One or more modal elements not found');
+        return;
+    }
 
     // Reset form fields and visibility
     commentsInput.value = '';
@@ -60,7 +80,7 @@ function setupActionModal(event) {
     commentsInput.required = false;
     reasonInput.required = false;
 
-    // Reset all sections to default state
+    // Reset sections
     commentsSection.style.display = 'block';
     reasonSection.style.display = 'none';
 
@@ -70,6 +90,7 @@ function setupActionModal(event) {
 
     // Clear existing button classes
     submitButton.className = 'btn';
+    submitButton.disabled = false;
 
     // Configure modal based on action type
     switch (actionType) {
@@ -81,7 +102,9 @@ function setupActionModal(event) {
             submitButton.classList.add('btn-success');
             commentsLabel.textContent = "Comments (Optional)";
             commentsInput.required = false;
+            console.log('Modal configured for Verify');
             break;
+
         case 'Return':
             form.action = `/Claims/Return`;
             modalTitle.textContent = 'Return Claim for Correction';
@@ -90,7 +113,10 @@ function setupActionModal(event) {
             submitButton.classList.add('btn-warning');
             commentsLabel.textContent = "Correction Instructions *";
             commentsInput.required = true;
+            commentsInput.placeholder = "Explain what needs to be corrected...";
+            console.log('Modal configured for Return');
             break;
+
         case 'Approve':
             form.action = `/Claims/Approve`;
             modalTitle.textContent = 'Approve Claim';
@@ -99,7 +125,9 @@ function setupActionModal(event) {
             submitButton.classList.add('btn-success');
             commentsLabel.textContent = "Comments (Optional)";
             commentsInput.required = false;
+            console.log('Modal configured for Approve');
             break;
+
         case 'Reject':
             form.action = `/Claims/Reject`;
             modalTitle.textContent = 'Reject Claim';
@@ -109,14 +137,31 @@ function setupActionModal(event) {
             commentsSection.style.display = 'none';
             reasonSection.style.display = 'block';
             reasonInput.required = true;
+            reasonInput.placeholder = "Provide a clear reason for rejection...";
+            console.log('Modal configured for Reject');
             break;
+
+        default:
+            console.error('Unknown action type:', actionType);
+            return;
     }
 
-    // Ensure modal is properly positioned and visible
-    setTimeout(() => {
-        const modalInstance = bootstrap.Modal.getInstance(modal);
-        if (modalInstance) {
-            modalInstance.handleUpdate();
+    // Add form validation
+    form.onsubmit = function (e) {
+        if (actionType === 'Return' && !commentsInput.value.trim()) {
+            e.preventDefault();
+            alert('Correction instructions are required when returning a claim.');
+            commentsInput.focus();
+            return false;
         }
-    }, 50);
+        if (actionType === 'Reject' && !reasonInput.value.trim()) {
+            e.preventDefault();
+            alert('A reason is required when rejecting a claim.');
+            reasonInput.focus();
+            return false;
+        }
+        return true;
+    };
+
+    console.log('Modal setup complete');
 }

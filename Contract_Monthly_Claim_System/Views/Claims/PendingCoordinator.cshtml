@@ -69,10 +69,10 @@
     </div>
 </div>
 
-<!-- Modal with higher z-index and proper backdrop configuration -->
-<div class="modal fade" id="actionModal" tabindex="-1" aria-labelledby="actionModalLabel" aria-hidden="true" data-bs-backdrop="static" style="z-index: 1060;">
+<!-- FIXED MODAL with proper backdrop configuration -->
+<div class="modal fade" id="actionModal" tabindex="-1" aria-labelledby="actionModalLabel" aria-hidden="true" data-bs-backdrop="true" data-bs-keyboard="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content" style="z-index: 1061;">
+        <div class="modal-content">
             <form method="post">
                 <div class="modal-header">
                     <h5 class="modal-title" id="actionModalTitle">Action Required</h5>
@@ -85,7 +85,7 @@
                         <label class="form-label" id="comments-label"></label>
                         <textarea class="form-control" name="comments" rows="3"></textarea>
                     </div>
-                    <div class="mb-3" id="reason-section">
+                    <div class="mb-3" id="reason-section" style="display: none;">
                         <label class="form-label" id="reason-label">Reason for Rejection *</label>
                         <input type="text" class="form-control" name="reason" />
                     </div>
@@ -99,39 +99,54 @@
     </div>
 </div>
 
-@section Styles {
-    <style>
-        /* Ensure modal backdrop appears correctly */
-        .modal-backdrop {
-            z-index: 1055 !important;
-        }
-
-        /* Ensure modal content is on top */
-        .modal {
-            z-index: 1060 !important;
-        }
-    </style>
-}
-
 @section Scripts {
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const actionModal = document.getElementById('actionModal');
 
             if (actionModal) {
+                // Setup modal when it's about to be shown
                 actionModal.addEventListener('show.bs.modal', function (event) {
+                    console.log('Modal opening...');
                     setupActionModal(event);
                 });
 
-                // Additional cleanup when modal is hidden
+                // Cleanup when modal is shown
+                actionModal.addEventListener('shown.bs.modal', function () {
+                    console.log('Modal shown successfully');
+                    // Focus first input
+                    const firstInput = actionModal.querySelector('textarea, input:not([type="hidden"])');
+                    if (firstInput) {
+                        firstInput.focus();
+                    }
+                });
+
+                // Cleanup when modal is hidden
                 actionModal.addEventListener('hidden.bs.modal', function () {
-                    // Clear any required fields that might prevent form submission
+                    console.log('Modal hidden');
+                    // Clear form
+                    const form = actionModal.querySelector('form');
+                    if (form) {
+                        form.reset();
+                    }
+                    // Reset required fields
                     const textarea = actionModal.querySelector('textarea[name="comments"]');
                     const reasonInput = actionModal.querySelector('input[name="reason"]');
-
                     if (textarea) textarea.required = false;
                     if (reasonInput) reasonInput.required = false;
                 });
+
+                // Form submission handler
+                const form = actionModal.querySelector('form');
+                if (form) {
+                    form.addEventListener('submit', function(e) {
+                        const submitButton = form.querySelector('button[type="submit"]');
+                        if (submitButton) {
+                            submitButton.disabled = true;
+                            submitButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Processing...';
+                        }
+                    });
+                }
             }
         });
     </script>
