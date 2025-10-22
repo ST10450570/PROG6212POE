@@ -9,7 +9,7 @@ namespace Contract_Monthly_Claim_System.ViewModels
         [Required]
         [StringLength(200)]
         [Display(Name = "Module / Work Description")]
-        public string WorkDescription { get; set; }
+        public string ?WorkDescription { get; set; }
 
         [Required]
         [Range(0.5, 100, ErrorMessage = "Hours must be between 0.5 and 100.")]
@@ -28,6 +28,6 @@ namespace Contract_Monthly_Claim_System.ViewModels
         [Display(Name = "Supporting Document")]
         [MaxFileSize(5 * 1024 * 1024)] // 5MB Limit
         [AllowedExtensions(new string[] { ".pdf", ".docx", ".xlsx" })]
-        public IFormFile SupportingDocument { get; set; }
+        public IFormFile ?SupportingDocument { get; set; }
     }
 }
