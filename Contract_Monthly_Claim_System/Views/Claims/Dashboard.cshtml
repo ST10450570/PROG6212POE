@@ -2,7 +2,7 @@
 @{
     ViewData["Title"] = "Dashboard";
     var userName = ViewBag.UserName ?? "";
-    var department = ViewBag.Department ?? "Computer Science";
+    var department = ViewBag.Department ?? "";
     var userRole = ViewBag.UserRole ?? "";
     var userInitials = ViewBag.UserInitials ?? "U";
 
@@ -146,7 +146,7 @@
                             case 'submitted': statusBadge = '<span class="badge bg-warning-soft">Submitted</span>'; break;
                             case 'returned': statusBadge = '<span class="badge bg-secondary-soft">Returned</span>'; break;
                             case 'draft': statusBadge = '<span class="badge bg-info-soft">Draft</span>'; break;
-                            case 'verified': statusBadge = '<span class="badge bg-primary-soft">Verified</span>'; break;
+                            case 'verified': statusBadge = '<span class="badge bg-verified-soft">Verified</span>'; break;
                             default: statusBadge = `<span class="badge bg-secondary-soft">${claim.status}</span>`;
                         }
 

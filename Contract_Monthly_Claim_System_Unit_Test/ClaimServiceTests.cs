@@ -278,7 +278,7 @@ namespace Contract_Monthly_Claim_System_Unit_Test
             Assert.Equal(400, claim.TotalAmount); // 20 * 20
             Assert.Equal(ClaimStatus.Draft, claim.Status); // Status should revert to Draft
             Assert.Null(claim.ReviewerComments); // Reviewer comments should be cleared
-            Assert.NotNull(claim.UpdatedDate);
+            Assert.True(claim.UpdatedDate > DateTime.MinValue);
         }
 
         [Fact]

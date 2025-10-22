@@ -6,8 +6,9 @@
         ClaimStatus.Approved => "bg-success-soft",
         ClaimStatus.Rejected => "bg-danger-soft",
         ClaimStatus.Submitted => "bg-warning-soft",
-        ClaimStatus.Verified => "bg-info-soft",
+        ClaimStatus.Verified => "bg-verified-soft", // Changed to unique class
         ClaimStatus.Returned => "bg-secondary-soft",
+        ClaimStatus.Draft => "bg-info-soft",
         _ => "bg-secondary-soft"
     };
 }

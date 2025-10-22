@@ -470,10 +470,17 @@ main {
     }
 
     .badge.bg-info-soft {
-        background-color: hsla(190, 80%, 50%, 0.15) !important;
+        background-color: hsla(190, 80%, 50%, 0.3) !important;
         color: var(--info-color) !important;
         border: 1px solid hsla(190, 80%, 50%, 0.3);
     }
+
+    .badge.bg-verified-soft {
+        background-color: hsla(270, 70%, 50%, 0.2) !important;
+        color: hsl(270, 70%, 60%) !important;
+        border: 1px solid hsla(270, 70%, 50%, 0.4);
+    }
+
 
 /* Enhanced Claim Details */
 .detail-grid {
