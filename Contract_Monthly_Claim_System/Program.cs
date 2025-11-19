@@ -1,37 +1,42 @@
-// Program.cs
 using Contract_Monthly_Claim_System.Data;
 using Contract_Monthly_Claim_System.Services;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // --- Add services to the container ---
-
 builder.Services.AddControllersWithViews();
 
-// Add HttpContextAccessor to access session/connection info in services
+// Add HttpContextAccessor
 builder.Services.AddHttpContextAccessor();
 
-// --- ADD THIS ---
-// 1. Add session services to the dependency injection container
+// Configure Session
 builder.Services.AddSession(options =>
 {
-    // You can configure session options here, e.g., timeout
     options.IdleTimeout = TimeSpan.FromMinutes(30);
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
+    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+    options.Cookie.SameSite = SameSiteMode.Lax;
 });
-// --- END ADD ---
 
+// Configure Database Context with SQL Server
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseSqlServer(
+        builder.Configuration.GetConnectionString("DefaultConnection"),
+        sqlServerOptions => sqlServerOptions
+            .EnableRetryOnFailure(
+                maxRetryCount: 5,
+                maxRetryDelay: TimeSpan.FromSeconds(30),
+                errorNumbersToAdd: null)
+    ));
 
-// Register application services with Dependency Injection
-// Scoped: A new instance is created for each web request.
+// Register Application Services
 builder.Services.AddScoped<IClaimService, ClaimService>();
 builder.Services.AddScoped<IUserSessionService, UserSessionService>();
-
-// Singleton: A single instance is created for the application's lifetime.
-builder.Services.AddSingleton<InMemoryDataStore>();
+builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
+builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddSingleton<IFileEncryptionService, FileEncryptionService>();
-
 
 var app = builder.Build();
 
@@ -42,28 +47,45 @@ if (!app.Environment.IsDevelopment())
     app.UseExceptionHandler("/Home/Error");
     app.UseHsts();
 }
+else
+{
+    app.UseDeveloperExceptionPage();
+}
 
 app.UseHttpsRedirection();
-app.UseStaticFiles(); // Enables serving files from wwwroot
+app.UseStaticFiles();
 
 app.UseRouting();
 
-// --- ADD THIS ---
-// 2. Enable the session middleware
-// This MUST be called *after* UseRouting() and *before* UseAuthorization() and MapControllerRoute().
+// Enable Session Middleware
 app.UseSession();
-// --- END ADD ---
 
 app.UseAuthorization();
 
-// Map the default controller route
+// Map Controller Routes
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+    pattern: "{controller=Account}/{action=Login}/{id?}");
 
-// Seed the in-memory database with initial data
-var dataStore = app.Services.GetRequiredService<InMemoryDataStore>();
-dataStore.SeedInitialData();
+// Database Initialization and Seeding
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    try
+    {
+        var context = services.GetRequiredService<ApplicationDbContext>();
 
+        // Ensure database is created
+        context.Database.EnsureCreated();
+
+        Console.WriteLine("Database connection successful!");
+    }
+    catch (Exception ex)
+    {
+        var logger = services.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "An error occurred while initializing the database.");
+        throw;
+    }
+}
 
 app.Run();

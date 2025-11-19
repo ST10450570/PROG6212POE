@@ -1,114 +1,132 @@
-﻿// Services/ClaimService.cs
-using Contract_Monthly_Claim_System.Data;
+﻿using Contract_Monthly_Claim_System.Data;
 using Contract_Monthly_Claim_System.Models;
 using Contract_Monthly_Claim_System.ViewModels;
+using Microsoft.EntityFrameworkCore;
 
 namespace Contract_Monthly_Claim_System.Services
 {
     public class ClaimService : IClaimService
     {
-        private readonly InMemoryDataStore _dataStore;
+        private readonly ApplicationDbContext _context;
         private readonly IFileEncryptionService _encryptionService;
 
-        public ClaimService(InMemoryDataStore dataStore, IFileEncryptionService encryptionService)
+        public ClaimService(ApplicationDbContext context, IFileEncryptionService encryptionService)
         {
-            _dataStore = dataStore;
+            _context = context;
             _encryptionService = encryptionService;
         }
 
         public async Task<Claim?> GetByIdAsync(int claimId)
         {
-            var claim = _dataStore.Claims.FirstOrDefault(c => c.Id == claimId);
-            if (claim != null)
-            {
-                claim.User = _dataStore.Users.First(u => u.Id == claim.UserId);
-                claim.Documents = _dataStore.Documents.Where(d => d.ClaimId == claim.Id).ToList();
-            }
-            return await Task.FromResult(claim);
+            return await _context.Claims
+                .Include(c => c.User)
+                .Include(c => c.Documents)
+                .Include(c => c.Coordinator)
+                .Include(c => c.Manager)
+                .FirstOrDefaultAsync(c => c.Id == claimId);
         }
 
         public async Task<IEnumerable<Claim>> GetClaimsForUserAsync(int userId)
         {
-            var claims = _dataStore.Claims
+            return await _context.Claims
+                .Include(c => c.User)
+                .Include(c => c.Documents)
                 .Where(c => c.UserId == userId)
                 .OrderByDescending(c => c.CreatedDate)
-                .ToList();
-
-            claims.ForEach(c => c.User = _dataStore.Users.First(u => u.Id == c.UserId));
-            return await Task.FromResult(claims);
+                .ToListAsync();
         }
 
         public async Task<IEnumerable<Claim>> GetPendingCoordinatorClaimsAsync()
         {
-            var claims = _dataStore.Claims
+            return await _context.Claims
+                .Include(c => c.User)
+                .Include(c => c.Documents)
                 .Where(c => c.Status == ClaimStatus.Submitted)
                 .OrderBy(c => c.SubmittedDate)
-                .ToList();
-
-            claims.ForEach(c => c.User = _dataStore.Users.First(u => u.Id == c.UserId));
-            return await Task.FromResult(claims);
+                .ToListAsync();
         }
 
         public async Task<IEnumerable<Claim>> GetPendingManagerClaimsAsync()
         {
-            var claims = _dataStore.Claims
+            return await _context.Claims
+                .Include(c => c.User)
+                .Include(c => c.Documents)
+                .Include(c => c.Coordinator)
                 .Where(c => c.Status == ClaimStatus.Verified)
                 .OrderBy(c => c.SubmittedDate)
-                .ToList();
-
-            claims.ForEach(c => c.User = _dataStore.Users.First(u => u.Id == c.UserId));
-            return await Task.FromResult(claims);
+                .ToListAsync();
         }
 
         public async Task<Claim> CreateClaimAsync(ClaimCreateViewModel viewModel, int userId)
         {
-            var user = _dataStore.Users.FirstOrDefault(u => u.Id == userId);
-            if (user == null) throw new InvalidOperationException("User not found.");
+            var user = await _context.Users.FindAsync(userId);
+            if (user == null || user.Role != UserRole.Lecturer)
+                throw new InvalidOperationException("User not found or not authorized to create claims.");
+
+            // Ensure lecturer has hourly rate set by HR
+            if (!user.HourlyRate.HasValue || user.HourlyRate.Value <= 0)
+                throw new InvalidOperationException("Your hourly rate has not been set by HR. Please contact HR to set your rate before submitting claims.");
+
+            // Use the hourly rate from user profile (set by HR)
+            var hourlyRate = user.HourlyRate.Value;
 
             var newClaim = new Claim
             {
-                Id = _dataStore.GetNextClaimId(),
-                ClaimNumber = $"CLM-{DateTime.UtcNow:yyyyMMdd}-{Guid.NewGuid().ToString("N")[..8].ToUpper()}",
+                ClaimNumber = GenerateClaimNumber(),
                 WorkDescription = viewModel.WorkDescription,
                 HoursWorked = viewModel.HoursWorked,
-                HourlyRate = viewModel.HourlyRate,
-                TotalAmount = viewModel.HoursWorked * viewModel.HourlyRate,
+                HourlyRate = hourlyRate, // Auto-pulled from user profile
+                TotalAmount = viewModel.HoursWorked * hourlyRate,
                 Notes = viewModel.Notes,
                 Status = ClaimStatus.Draft,
                 UserId = userId,
-                User = user
+                CreatedDate = DateTime.UtcNow,
+                UpdatedDate = DateTime.UtcNow
             };
 
-            // Handle file encryption and storage
-            byte[] encryptedData;
-            using (var inputStream = viewModel.SupportingDocument.OpenReadStream())
+            _context.Claims.Add(newClaim);
+            await _context.SaveChangesAsync();
+
+            // Handle document upload if provided (now optional)
+            if (viewModel.SupportingDocument != null)
             {
-                encryptedData = _encryptionService.EncryptStreamToBytes(inputStream);
+                byte[] encryptedData;
+                using (var inputStream = viewModel.SupportingDocument.OpenReadStream())
+                {
+                    encryptedData = _encryptionService.EncryptStreamToBytes(inputStream);
+                }
+
+                var newDocument = new Document
+                {
+                    FileName = viewModel.SupportingDocument.FileName,
+                    ContentType = viewModel.SupportingDocument.ContentType,
+                    EncryptedContent = encryptedData,
+                    ClaimId = newClaim.Id,
+                    UploadDate = DateTime.UtcNow
+                };
+
+                _context.Documents.Add(newDocument);
+                await _context.SaveChangesAsync();
             }
 
-            var newDocument = new Document
-            {
-                Id = _dataStore.GetNextDocumentId(),
-                FileName = viewModel.SupportingDocument.FileName,
-                ContentType = viewModel.SupportingDocument.ContentType,
-                EncryptedContent = encryptedData,
-                ClaimId = newClaim.Id
-            };
-
-            _dataStore.Documents.Add(newDocument);
-            _dataStore.Claims.Add(newClaim);
-
-            return await Task.FromResult(newClaim);
+            return await GetByIdAsync(newClaim.Id)
+                ?? throw new InvalidOperationException("Failed to retrieve created claim.");
         }
 
         public async Task SubmitClaimAsync(int claimId, int userId)
         {
             var claim = await GetByIdAsync(claimId);
-            if (claim == null || claim.UserId != userId || !claim.CanSubmit)
-                throw new InvalidOperationException("Claim not found or cannot be submitted.");
+            if (claim == null || claim.UserId != userId)
+                throw new InvalidOperationException("Claim not found or access denied.");
+
+            if (claim.Status != ClaimStatus.Draft && claim.Status != ClaimStatus.Returned)
+                throw new InvalidOperationException("Only draft or returned claims can be submitted.");
 
             claim.Status = ClaimStatus.Submitted;
-            claim.SubmittedDate = DateTime.Now;
+            claim.SubmittedDate = DateTime.UtcNow;
+            claim.UpdatedDate = DateTime.UtcNow;
+
+            await _context.SaveChangesAsync();
         }
 
         public async Task VerifyClaimAsync(int claimId, string comments, int coordinatorId)
@@ -119,6 +137,10 @@ namespace Contract_Monthly_Claim_System.Services
 
             claim.Status = ClaimStatus.Verified;
             claim.ReviewerComments = comments;
+            claim.CoordinatorId = coordinatorId;
+            claim.UpdatedDate = DateTime.UtcNow;
+
+            await _context.SaveChangesAsync();
         }
 
         public async Task ApproveClaimAsync(int claimId, string comments, int managerId)
@@ -129,6 +151,10 @@ namespace Contract_Monthly_Claim_System.Services
 
             claim.Status = ClaimStatus.Approved;
             claim.ReviewerComments = comments;
+            claim.ManagerId = managerId;
+            claim.UpdatedDate = DateTime.UtcNow;
+
+            await _context.SaveChangesAsync();
         }
 
         public async Task RejectClaimAsync(int claimId, string reason, int reviewerId)
@@ -139,6 +165,19 @@ namespace Contract_Monthly_Claim_System.Services
 
             claim.Status = ClaimStatus.Rejected;
             claim.RejectionReason = reason;
+            claim.UpdatedDate = DateTime.UtcNow;
+
+            // Set reviewer ID based on current status
+            if (claim.Status == ClaimStatus.Submitted)
+            {
+                claim.CoordinatorId = reviewerId;
+            }
+            else if (claim.Status == ClaimStatus.Verified)
+            {
+                claim.ManagerId = reviewerId;
+            }
+
+            await _context.SaveChangesAsync();
         }
 
         public async Task ReturnClaimAsync(int claimId, string comments, int coordinatorId)
@@ -149,77 +188,105 @@ namespace Contract_Monthly_Claim_System.Services
 
             claim.Status = ClaimStatus.Returned;
             claim.ReviewerComments = comments;
+            claim.CoordinatorId = coordinatorId;
+            claim.UpdatedDate = DateTime.UtcNow;
+
+            await _context.SaveChangesAsync();
         }
 
         public async Task<int> GetTotalClaimsCountAsync(int userId)
         {
-            return await Task.FromResult(
-                _dataStore.Claims.Where(c => c.UserId == userId).Count()
-            );
+            return await _context.Claims
+                .Where(c => c.UserId == userId)
+                .CountAsync();
         }
 
         public async Task<int> GetApprovedClaimsCountAsync(int userId)
         {
-            return await Task.FromResult(
-                _dataStore.Claims.Where(c => c.UserId == userId && c.Status == ClaimStatus.Approved).Count()
-            );
+            return await _context.Claims
+                .Where(c => c.UserId == userId && c.Status == ClaimStatus.Approved)
+                .CountAsync();
         }
 
         public async Task<int> GetPendingClaimsCountAsync(int userId)
         {
-            return await Task.FromResult(
-                _dataStore.Claims.Where(c => c.UserId == userId &&
-                    (c.Status == ClaimStatus.Submitted || c.Status == ClaimStatus.Verified)).Count()
-            );
+            return await _context.Claims
+                .Where(c => c.UserId == userId &&
+                           (c.Status == ClaimStatus.Submitted || c.Status == ClaimStatus.Verified))
+                .CountAsync();
         }
 
         public async Task<decimal> GetTotalApprovedAmountAsync(int userId)
         {
-            return await Task.FromResult(
-                _dataStore.Claims.Where(c => c.UserId == userId && c.Status == ClaimStatus.Approved)
-                    .Sum(c => c.TotalAmount)
-            );
+            return await _context.Claims
+                .Where(c => c.UserId == userId && c.Status == ClaimStatus.Approved)
+                .SumAsync(c => c.TotalAmount);
         }
 
         public async Task<IEnumerable<Claim>> GetRecentClaimsAsync(int userId, int count = 10)
         {
-            return await Task.FromResult(
-                _dataStore.Claims.Where(c => c.UserId == userId)
-                    .OrderByDescending(c => c.CreatedDate)
-                    .Take(count)
-                    .ToList()
-            );
+            return await _context.Claims
+                .Where(c => c.UserId == userId)
+                .OrderByDescending(c => c.CreatedDate)
+                .Take(count)
+                .ToListAsync();
         }
 
         public async Task UpdateClaimAsync(int claimId, ClaimEditViewModel viewModel, int userId)
         {
-            var claim = _dataStore.Claims
-                .FirstOrDefault(c => c.Id == claimId && c.UserId == userId);
+            var claim = await _context.Claims
+                .Include(c => c.User)
+                .FirstOrDefaultAsync(c => c.Id == claimId && c.UserId == userId);
 
             if (claim == null)
-                throw new InvalidOperationException("Claim not found.");
+                throw new InvalidOperationException("Claim not found or access denied.");
 
-            // Allow editing for both Draft and Returned status
             if (claim.Status != ClaimStatus.Draft && claim.Status != ClaimStatus.Returned)
                 throw new InvalidOperationException("Only draft and returned claims can be edited.");
 
+            // Use the user's current hourly rate (as set by HR)
+            var hourlyRate = claim.User?.HourlyRate ?? viewModel.HourlyRate;
+
             claim.WorkDescription = viewModel.WorkDescription;
             claim.HoursWorked = viewModel.HoursWorked;
-            claim.HourlyRate = viewModel.HourlyRate;
+            claim.HourlyRate = hourlyRate;
             claim.Notes = viewModel.Notes;
-            claim.TotalAmount = viewModel.HoursWorked * viewModel.HourlyRate;
+            claim.TotalAmount = viewModel.HoursWorked * hourlyRate;
             claim.UpdatedDate = DateTime.UtcNow;
 
             // If claim was returned and is being edited, change status back to Draft
             if (claim.Status == ClaimStatus.Returned)
             {
                 claim.Status = ClaimStatus.Draft;
-                // Clear previous reviewer comments since we're making corrections
                 claim.ReviewerComments = null;
             }
 
-            // No SaveChangesAsync needed for in-memory data store
-            await Task.CompletedTask;
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task<IEnumerable<Claim>> GetAllClaimsAsync()
+        {
+            return await _context.Claims
+                .Include(c => c.User)
+                .Include(c => c.Coordinator)
+                .Include(c => c.Manager)
+                .OrderByDescending(c => c.CreatedDate)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<Claim>> GetApprovedClaimsAsync()
+        {
+            return await _context.Claims
+                .Include(c => c.User)
+                .Include(c => c.Manager)
+                .Where(c => c.Status == ClaimStatus.Approved)
+                .OrderByDescending(c => c.SubmittedDate)
+                .ToListAsync();
+        }
+
+        private string GenerateClaimNumber()
+        {
+            return $"CLM-{DateTime.UtcNow:yyyyMMdd}-{Guid.NewGuid().ToString("N")[..8].ToUpper()}";
         }
     }
 }

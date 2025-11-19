@@ -1,10 +1,7 @@
-﻿// Controllers/ClaimsController.cs
-
-using Contract_Monthly_Claim_System.Models;
+﻿using Contract_Monthly_Claim_System.Models;
 using Contract_Monthly_Claim_System.Services;
 using Contract_Monthly_Claim_System.ViewModels;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 
 namespace Contract_Monthly_Claim_System.Controllers
 {
@@ -19,14 +16,38 @@ namespace Contract_Monthly_Claim_System.Controllers
             _userSessionService = userSessionService;
         }
 
+        // Authorization Check
+        private IActionResult CheckAuthorization(UserRole? requiredRole = null)
+        {
+            var currentUser = _userSessionService.GetCurrentUser();
+            if (currentUser == null)
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            if (requiredRole.HasValue && currentUser.Role != requiredRole.Value)
+            {
+                return RedirectToAction("AccessDenied", "Account");
+            }
+
+            return null!;
+        }
+
+        private ApplicationUser? GetCurrentUser()
+        {
+            return _userSessionService.GetCurrentUser();
+        }
+
         // --- Dashboard Action ---
         public IActionResult Dashboard()
         {
-            var currentUser = _userSessionService.GetCurrentUser();
-            if (currentUser == null) return RedirectToAction("Login", "Home");
+            var authResult = CheckAuthorization(UserRole.Lecturer);
+            if (authResult != null) return authResult;
+
+            var currentUser = GetCurrentUser()!;
 
             ViewBag.UserName = currentUser.FullName;
-            ViewBag.Department = currentUser.department;
+            ViewBag.Department = currentUser.Department;
             ViewBag.UserRole = currentUser.Role.ToString();
             ViewBag.UserInitials = currentUser.Initials;
 
@@ -36,8 +57,9 @@ namespace Contract_Monthly_Claim_System.Controllers
         [HttpGet]
         public async Task<JsonResult> GetDashboardStats()
         {
-            var currentUser = _userSessionService.GetCurrentUser();
-            if (currentUser == null) return Json(new { error = "Unauthorized" });
+            var currentUser = GetCurrentUser();
+            if (currentUser == null || currentUser.Role != UserRole.Lecturer)
+                return Json(new { error = "Unauthorized" });
 
             try
             {
@@ -60,8 +82,9 @@ namespace Contract_Monthly_Claim_System.Controllers
         [HttpGet]
         public async Task<JsonResult> GetRecentClaims()
         {
-            var currentUser = _userSessionService.GetCurrentUser();
-            if (currentUser == null) return Json(new { error = "Unauthorized" });
+            var currentUser = GetCurrentUser();
+            if (currentUser == null || currentUser.Role != UserRole.Lecturer)
+                return Json(new { error = "Unauthorized" });
 
             try
             {
@@ -88,27 +111,44 @@ namespace Contract_Monthly_Claim_System.Controllers
         // --- Lecturer Actions ---
         public async Task<IActionResult> MyClaims()
         {
-            var currentUser = AuthorizeAndGetUser(UserRole.Lecturer);
-            if (currentUser == null) return Forbid();
+            var authResult = CheckAuthorization(UserRole.Lecturer);
+            if (authResult != null) return authResult;
 
+            var currentUser = GetCurrentUser()!;
             var claims = await _claimService.GetClaimsForUserAsync(currentUser.Id);
             return View(claims);
         }
 
         public IActionResult Create()
         {
-            var currentUser = AuthorizeAndGetUser(UserRole.Lecturer);
-            if (currentUser == null) return Forbid();
+            var authResult = CheckAuthorization(UserRole.Lecturer);
+            if (authResult != null) return authResult;
 
-            return View(new ClaimCreateViewModel());
+            var currentUser = GetCurrentUser()!;
+
+            // Check if user has hourly rate set
+            if (!currentUser.HourlyRate.HasValue || currentUser.HourlyRate.Value <= 0)
+            {
+                TempData["Error"] = "Your hourly rate has not been set by HR. Please contact HR before submitting claims.";
+                return RedirectToAction("Dashboard");
+            }
+
+            var viewModel = new ClaimCreateViewModel
+            {
+                HourlyRate = currentUser.HourlyRate.Value // Pre-populate with user's rate
+            };
+
+            return View(viewModel);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(ClaimCreateViewModel viewModel)
         {
-            var currentUser = AuthorizeAndGetUser(UserRole.Lecturer);
-            if (currentUser == null) return Forbid();
+            var authResult = CheckAuthorization(UserRole.Lecturer);
+            if (authResult != null) return authResult;
+
+            var currentUser = GetCurrentUser()!;
 
             if (!ModelState.IsValid)
             {
@@ -118,7 +158,7 @@ namespace Contract_Monthly_Claim_System.Controllers
             try
             {
                 var newClaim = await _claimService.CreateClaimAsync(viewModel, currentUser.Id);
-                TempData["Success"] = $"Claim {newClaim.ClaimNumber} created successfully in Draft status. You can now submit it for review.";
+                TempData["Success"] = $"Claim {newClaim.ClaimNumber} created successfully in Draft status.";
                 return RedirectToAction("Details", new { id = newClaim.Id });
             }
             catch (Exception ex)
@@ -132,8 +172,10 @@ namespace Contract_Monthly_Claim_System.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Submit(int id)
         {
-            var currentUser = AuthorizeAndGetUser(UserRole.Lecturer);
-            if (currentUser == null) return Forbid();
+            var authResult = CheckAuthorization(UserRole.Lecturer);
+            if (authResult != null) return authResult;
+
+            var currentUser = GetCurrentUser()!;
 
             try
             {
@@ -150,14 +192,20 @@ namespace Contract_Monthly_Claim_System.Controllers
         // --- Edit Actions ---
         public async Task<IActionResult> Edit(int id)
         {
-            var currentUser = AuthorizeAndGetUser(UserRole.Lecturer);
-            if (currentUser == null) return Forbid();
+            var authResult = CheckAuthorization(UserRole.Lecturer);
+            if (authResult != null) return authResult;
 
+            var currentUser = GetCurrentUser()!;
             var claim = await _claimService.GetByIdAsync(id);
+
             if (claim == null) return NotFound();
 
-            // Allow editing if claim is in draft or returned status and belongs to the current user
-            if ((claim.Status != ClaimStatus.Draft && claim.Status != ClaimStatus.Returned) || claim.UserId != currentUser.Id)
+            if (claim.UserId != currentUser.Id)
+            {
+                return RedirectToAction("AccessDenied", "Account");
+            }
+
+            if (claim.Status != ClaimStatus.Draft && claim.Status != ClaimStatus.Returned)
             {
                 TempData["Error"] = "You can only edit claims that are in draft or returned status.";
                 return RedirectToAction("Details", new { id });
@@ -170,7 +218,7 @@ namespace Contract_Monthly_Claim_System.Controllers
                 HoursWorked = claim.HoursWorked,
                 HourlyRate = claim.HourlyRate,
                 Notes = claim.Notes,
-                Status = claim.Status // Include status to show context in the view
+                Status = claim.Status
             };
 
             return View(viewModel);
@@ -180,8 +228,10 @@ namespace Contract_Monthly_Claim_System.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, ClaimEditViewModel viewModel)
         {
-            var currentUser = AuthorizeAndGetUser(UserRole.Lecturer);
-            if (currentUser == null) return Forbid();
+            var authResult = CheckAuthorization(UserRole.Lecturer);
+            if (authResult != null) return authResult;
+
+            var currentUser = GetCurrentUser()!;
 
             if (!ModelState.IsValid)
             {
@@ -214,8 +264,8 @@ namespace Contract_Monthly_Claim_System.Controllers
         // --- Coordinator Actions ---
         public async Task<IActionResult> PendingCoordinator()
         {
-            var currentUser = AuthorizeAndGetUser(UserRole.Coordinator);
-            if (currentUser == null) return Forbid();
+            var authResult = CheckAuthorization(UserRole.Coordinator);
+            if (authResult != null) return authResult;
 
             var claims = await _claimService.GetPendingCoordinatorClaimsAsync();
             return View(claims);
@@ -223,20 +273,30 @@ namespace Contract_Monthly_Claim_System.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Verify(int id, string comments)
+        public async Task<IActionResult> Verify(int id, string? comments)
         {
-            var currentUser = AuthorizeAndGetUser(UserRole.Coordinator);
-            if (currentUser == null) return Forbid();
+            var authResult = CheckAuthorization(UserRole.Coordinator);
+            if (authResult != null) return authResult;
+
+            var currentUser = GetCurrentUser()!;
 
             try
             {
-                await _claimService.VerifyClaimAsync(id, comments, currentUser.Id);
+                await _claimService.VerifyClaimAsync(id, comments ?? string.Empty, currentUser.Id);
                 TempData["Success"] = "Claim verified and escalated to Manager.";
             }
             catch (InvalidOperationException ex)
             {
                 TempData["Error"] = ex.Message;
             }
+
+            // Check if request came from details page
+            var referer = Request.Headers["Referer"].ToString();
+            if (referer.Contains("/Claims/Details/"))
+            {
+                return RedirectToAction("Details", new { id });
+            }
+
             return RedirectToAction("PendingCoordinator");
         }
 
@@ -244,8 +304,10 @@ namespace Contract_Monthly_Claim_System.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Return(int id, string comments)
         {
-            var currentUser = AuthorizeAndGetUser(UserRole.Coordinator);
-            if (currentUser == null) return Forbid();
+            var authResult = CheckAuthorization(UserRole.Coordinator);
+            if (authResult != null) return authResult;
+
+            var currentUser = GetCurrentUser()!;
 
             if (string.IsNullOrWhiteSpace(comments))
             {
@@ -262,14 +324,22 @@ namespace Contract_Monthly_Claim_System.Controllers
             {
                 TempData["Error"] = ex.Message;
             }
+
+            // Check if request came from details page
+            var referer = Request.Headers["Referer"].ToString();
+            if (referer.Contains("/Claims/Details/"))
+            {
+                return RedirectToAction("Details", new { id });
+            }
+
             return RedirectToAction("PendingCoordinator");
         }
 
         // --- Manager Actions ---
         public async Task<IActionResult> PendingManager()
         {
-            var currentUser = AuthorizeAndGetUser(UserRole.Manager);
-            if (currentUser == null) return Forbid();
+            var authResult = CheckAuthorization(UserRole.Manager);
+            if (authResult != null) return authResult;
 
             var claims = await _claimService.GetPendingManagerClaimsAsync();
             return View(claims);
@@ -277,36 +347,46 @@ namespace Contract_Monthly_Claim_System.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Approve(int id, string comments)
+        public async Task<IActionResult> Approve(int id, string? comments)
         {
-            var currentUser = AuthorizeAndGetUser(UserRole.Manager);
-            if (currentUser == null) return Forbid();
+            var authResult = CheckAuthorization(UserRole.Manager);
+            if (authResult != null) return authResult;
+
+            var currentUser = GetCurrentUser()!;
 
             try
             {
-                await _claimService.ApproveClaimAsync(id, comments, currentUser.Id);
+                await _claimService.ApproveClaimAsync(id, comments ?? string.Empty, currentUser.Id);
                 TempData["Success"] = "Claim has been approved.";
             }
             catch (InvalidOperationException ex)
             {
                 TempData["Error"] = ex.Message;
             }
+
+            // Check if request came from details page
+            var referer = Request.Headers["Referer"].ToString();
+            if (referer.Contains("/Claims/Details/"))
+            {
+                return RedirectToAction("Details", new { id });
+            }
+
             return RedirectToAction("PendingManager");
         }
 
         // --- Common Actions ---
         public async Task<IActionResult> Details(int id)
         {
-            var currentUser = _userSessionService.GetCurrentUser();
-            if (currentUser == null) return Unauthorized();
+            var currentUser = GetCurrentUser();
+            if (currentUser == null) return RedirectToAction("Login", "Account");
 
             var claim = await _claimService.GetByIdAsync(id);
             if (claim == null) return NotFound();
 
-            // Authorization: User can see their own claim, or a reviewer can see any claim.
-            if (claim.UserId != currentUser.Id && currentUser.Role == UserRole.Lecturer)
+            // Authorization: User can see their own claim, or reviewers/HR can see any claim
+            if (currentUser.Role == UserRole.Lecturer && claim.UserId != currentUser.Id)
             {
-                return Forbid();
+                return RedirectToAction("AccessDenied", "Account");
             }
 
             return View(claim);
@@ -316,12 +396,22 @@ namespace Contract_Monthly_Claim_System.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Reject(int id, string reason)
         {
-            var currentUser = _userSessionService.GetCurrentUser();
-            if (currentUser == null || currentUser.Role == UserRole.Lecturer) return Forbid();
+            var currentUser = GetCurrentUser();
+            if (currentUser == null || currentUser.Role == UserRole.Lecturer || currentUser.Role == UserRole.HR)
+            {
+                return RedirectToAction("AccessDenied", "Account");
+            }
 
             if (string.IsNullOrWhiteSpace(reason))
             {
                 TempData["Error"] = "A reason is required to reject a claim.";
+
+                var referer = Request.Headers["Referer"].ToString();
+                if (referer.Contains("/Claims/Details/"))
+                {
+                    return RedirectToAction("Details", new { id });
+                }
+
                 return RedirectToAction(currentUser.Role == UserRole.Coordinator ? "PendingCoordinator" : "PendingManager");
             }
 
@@ -335,18 +425,14 @@ namespace Contract_Monthly_Claim_System.Controllers
                 TempData["Error"] = ex.Message;
             }
 
-            return RedirectToAction(currentUser.Role == UserRole.Coordinator ? "PendingCoordinator" : "PendingManager");
-        }
-
-        // --- Private Helper Methods ---
-        private ApplicationUser? AuthorizeAndGetUser(UserRole requiredRole)
-        {
-            var user = _userSessionService.GetCurrentUser();
-            if (user == null || user.Role != requiredRole)
+            // Check if request came from details page
+            var referer2 = Request.Headers["Referer"].ToString();
+            if (referer2.Contains("/Claims/Details/"))
             {
-                return null;
+                return RedirectToAction("Details", new { id });
             }
-            return user;
+
+            return RedirectToAction(currentUser.Role == UserRole.Coordinator ? "PendingCoordinator" : "PendingManager");
         }
     }
 }

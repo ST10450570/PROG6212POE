@@ -1,25 +1,29 @@
-﻿// Services/UserSessionService.cs
-using Contract_Monthly_Claim_System.Data;
+﻿using Contract_Monthly_Claim_System.Data;
 using Contract_Monthly_Claim_System.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace Contract_Monthly_Claim_System.Services
 {
     public class UserSessionService : IUserSessionService
     {
         private readonly IHttpContextAccessor _httpContextAccessor;
-        private readonly InMemoryDataStore _dataStore;
+        private readonly ApplicationDbContext _context;
         private const string UserIdSessionKey = "UserId";
 
-        public UserSessionService(IHttpContextAccessor httpContextAccessor, InMemoryDataStore dataStore)
+        public UserSessionService(IHttpContextAccessor httpContextAccessor, ApplicationDbContext context)
         {
             _httpContextAccessor = httpContextAccessor;
-            _dataStore = dataStore;
+            _context = context;
         }
 
         public ApplicationUser? GetCurrentUser()
         {
             var userId = _httpContextAccessor.HttpContext?.Session.GetInt32(UserIdSessionKey);
-            return userId.HasValue ? _dataStore.Users.FirstOrDefault(u => u.Id == userId.Value) : null;
+            if (!userId.HasValue)
+                return null;
+
+            return _context.Users
+                .FirstOrDefault(u => u.Id == userId.Value && u.IsActive);
         }
 
         public void SetCurrentUser(int userId)
