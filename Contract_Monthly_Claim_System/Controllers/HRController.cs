@@ -218,6 +218,68 @@ namespace Contract_Monthly_Claim_System.Controllers
             return View(claims);
         }
 
+        // Lecturer Performance Report
+        [HttpGet]
+        public async Task<IActionResult> LecturerPerformance()
+        {
+            var currentUser = AuthorizeHR();
+            if (currentUser == null) return RedirectToAction("AccessDenied", "Account");
+
+            var lecturers = await _userService.GetLecturersAsync();
+            var performanceData = new List<LecturerPerformanceViewModel>();
+
+            foreach (var lecturer in lecturers)
+            {
+                var claims = await _claimService.GetClaimsForUserAsync(lecturer.Id);
+                var approvedClaims = claims.Where(c => c.Status == ClaimStatus.Approved);
+
+                performanceData.Add(new LecturerPerformanceViewModel
+                {
+                    LecturerId = lecturer.Id,
+                    LecturerName = lecturer.FullName,
+                    Department = lecturer.Department,
+                    HourlyRate = lecturer.HourlyRate ?? 0,
+                    TotalClaims = claims.Count(),
+                    ApprovedClaims = approvedClaims.Count(),
+                    TotalAmount = approvedClaims.Sum(c => c.TotalAmount),
+                    AverageHours = approvedClaims.Any() ? approvedClaims.Average(c => c.HoursWorked) : 0
+                });
+            }
+
+            return View(performanceData);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> GeneratePerformanceReport()
+        {
+            var currentUser = AuthorizeHR();
+            if (currentUser == null) return RedirectToAction("AccessDenied", "Account");
+
+            try
+            {
+                var lecturers = await _userService.GetLecturersAsync();
+                var csv = new System.Text.StringBuilder();
+                csv.AppendLine("Lecturer Name,Department,Hourly Rate,Total Claims,Approved Claims,Total Amount,Average Hours");
+
+                foreach (var lecturer in lecturers)
+                {
+                    var claims = await _claimService.GetClaimsForUserAsync(lecturer.Id);
+                    var approvedClaims = claims.Where(c => c.Status == ClaimStatus.Approved);
+                    var averageHours = approvedClaims.Any() ? approvedClaims.Average(c => c.HoursWorked) : 0;
+
+                    csv.AppendLine($"\"{lecturer.FullName}\",\"{lecturer.Department}\",{lecturer.HourlyRate},{claims.Count()},{approvedClaims.Count()},{approvedClaims.Sum(c => c.TotalAmount)},{averageHours}");
+                }
+
+                var bytes = System.Text.Encoding.UTF8.GetBytes(csv.ToString());
+                return File(bytes, "text/csv", $"LecturerPerformance_{DateTime.Now:yyyyMMdd}.csv");
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = $"Error generating report: {ex.Message}";
+                return RedirectToAction("LecturerPerformance");
+            }
+        }
+
         // Generate Invoice/Report (Simple CSV export)
         public async Task<IActionResult> GenerateReport(string reportType)
         {

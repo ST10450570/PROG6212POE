@@ -22,5 +22,9 @@ namespace Contract_Monthly_Claim_System.Services
         Task<decimal> GetTotalApprovedAmountAsync(int userId);
         Task<IEnumerable<Claim>> GetRecentClaimsAsync(int userId, int count);
         Task UpdateClaimAsync(int claimId, ClaimEditViewModel viewModel, int userId);
+
+       
+        Task<IEnumerable<Claim>> GetAllClaimsAsync();
+        Task<IEnumerable<Claim>> GetApprovedClaimsAsync();
     }
 }

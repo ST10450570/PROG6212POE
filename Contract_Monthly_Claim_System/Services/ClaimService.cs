@@ -284,6 +284,8 @@ namespace Contract_Monthly_Claim_System.Services
                 .ToListAsync();
         }
 
+
+
         private string GenerateClaimNumber()
         {
             return $"CLM-{DateTime.UtcNow:yyyyMMdd}-{Guid.NewGuid().ToString("N")[..8].ToUpper()}";

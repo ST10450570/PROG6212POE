@@ -1,0 +1,70 @@
+﻿@model IEnumerable<LecturerPerformanceViewModel>
+
+@{
+    ViewData["Title"] = "Lecturer Performance Report";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4 border-bottom-themed pb-2">
+    <h1 class="h2"><i class="fas fa-chart-line me-2"></i>Lecturer Performance Report</h1>
+    <form asp-action="GeneratePerformanceReport" method="post">
+        <button type="submit" class="btn btn-success">
+            <i class="fas fa-download me-1"></i> Export CSV
+        </button>
+    </form>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        @if (!Model.Any())
+        {
+            <div class="text-center p-5">
+                <i class="fas fa-chart-bar fa-3x text-secondary mb-3"></i>
+                <h4 class="text-secondary">No performance data available.</h4>
+                <p>No claims have been submitted by lecturers yet.</p>
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th>Lecturer</th>
+                            <th>Department</th>
+                            <th>Hourly Rate</th>
+                            <th>Total Claims</th>
+                            <th>Approved</th>
+                            <th>Total Amount</th>
+                            <th>Avg Hours</th>
+                            <th>Success Rate</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            var successRate = item.TotalClaims > 0 ? (item.ApprovedClaims * 100.0 / item.TotalClaims) : 0;
+                            <tr>
+                                <td class="fw-bold">@item.LecturerName</td>
+                                <td>@item.Department</td>
+                                <td>@item.HourlyRate.ToString("C", new System.Globalization.CultureInfo("en-ZA"))</td>
+                                <td>@item.TotalClaims</td>
+                                <td>@item.ApprovedClaims</td>
+                                <td>@item.TotalAmount.ToString("C", new System.Globalization.CultureInfo("en-ZA"))</td>
+                                <td>@item.AverageHours.ToString("F1") hrs</td>
+                                <td>
+                                    <div class="progress" style="height: 20px;">
+                                        <div class="progress-bar @(successRate >= 80 ? "bg-success" : successRate >= 60 ? "bg-warning" : "bg-danger")"
+                                             role="progressbar" style="width: @successRate%;"
+                                             aria-valuenow="@successRate" aria-valuemin="0" aria-valuemax="100">
+                                            @successRate.ToString("F1")%
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>

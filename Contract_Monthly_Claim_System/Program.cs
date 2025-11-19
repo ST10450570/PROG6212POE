@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// --- Add services to the container ---
+// Add services to the container
 builder.Services.AddControllersWithViews();
 
 // Add HttpContextAccessor
@@ -40,8 +40,7 @@ builder.Services.AddSingleton<IFileEncryptionService, FileEncryptionService>();
 
 var app = builder.Build();
 
-// --- Configure the HTTP request pipeline ---
-
+// Configure the HTTP request pipeline
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
@@ -75,8 +74,11 @@ using (var scope = app.Services.CreateScope())
     {
         var context = services.GetRequiredService<ApplicationDbContext>();
 
-        // Ensure database is created
-        context.Database.EnsureCreated();
+        // Ensure database is created and apply migrations
+        context.Database.Migrate();
+
+        // Seed initial data if needed
+        await DbInitializer.Initialize(context, services.GetRequiredService<IAuthenticationService>());
 
         Console.WriteLine("Database connection successful!");
     }

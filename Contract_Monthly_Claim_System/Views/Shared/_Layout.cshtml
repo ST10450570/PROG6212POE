@@ -1,7 +1,10 @@
-﻿<!DOCTYPE html>
+﻿@using Contract_Monthly_Claim_System.Services
+@inject IUserSessionService UserSession
+
+<!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-g" />
+    <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - CMCS</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
@@ -32,7 +35,6 @@
                             {
                                 if (currentUser.Role == UserRole.Lecturer)
                                 {
-                                   
                                     <li class="nav-item">
                                         <a class="nav-link" asp-area="" asp-controller="Claims" asp-action="Dashboard">
                                             <i class="fas fa-tachometer-alt me-1"></i>Dashboard
@@ -40,6 +42,9 @@
                                     </li>
                                     <li class="nav-item">
                                         <a class="nav-link" asp-controller="Claims" asp-action="Create">New Claim</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link" asp-controller="Claims" asp-action="MyClaims">My Claims</a>
                                     </li>
                                 }
                                 else if (currentUser.Role == UserRole.Coordinator)
@@ -52,6 +57,18 @@
                                 {
                                     <li class="nav-item">
                                         <a class="nav-link" asp-controller="Claims" asp-action="PendingManager">Pending Approval</a>
+                                    </li>
+                                }
+                                else if (currentUser.Role == UserRole.HR)
+                                {
+                                    <li class="nav-item">
+                                        <a class="nav-link" asp-controller="HR" asp-action="Dashboard">HR Dashboard</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link" asp-controller="HR" asp-action="Users">User Management</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link" asp-controller="HR" asp-action="LecturerPerformance">Performance Reports</a>
                                     </li>
                                 }
                             }
@@ -71,9 +88,11 @@
                                     <li><h6 class="dropdown-header">@currentUser.Role</h6></li>
                                     <li><hr class="dropdown-divider"></li>
                                     <li>
-                                        <a class="dropdown-item" asp-controller="Home" asp-action="Logout">
-                                            <i class="fas fa-sign-out-alt me-2"></i>Logout
-                                        </a>
+                                        <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
+                                            <button type="submit" class="dropdown-item">
+                                                <i class="fas fa-sign-out-alt me-2"></i>Logout
+                                            </button>
+                                        </form>
                                     </li>
                                 </ul>
                             </li>
@@ -83,6 +102,7 @@
             </div>
         </nav>
     </header>
+    
     <div class="container-fluid main-container">
         <main role="main" class="pb-3">
             @if (TempData["Success"] != null)
