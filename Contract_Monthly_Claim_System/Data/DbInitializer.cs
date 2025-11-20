@@ -1,5 +1,6 @@
 ﻿using Contract_Monthly_Claim_System.Models;
 using Contract_Monthly_Claim_System.Services;
+using Microsoft.EntityFrameworkCore; // Required for FirstOrDefaultAsync
 
 namespace Contract_Monthly_Claim_System.Data
 {
@@ -10,15 +11,9 @@ namespace Contract_Monthly_Claim_System.Data
             // Ensure database is created
             await context.Database.EnsureCreatedAsync();
 
-            // Check if users already exist
-            if (context.Users.Any())
-            {
-                return; // DB has been seeded
-            }
-
+            // Define the users you want to guarantee exist
             var users = new List<ApplicationUser>
             {
-                // HR User
                 new ApplicationUser
                 {
                     FullName = "Kekeletso Mokete",
@@ -26,13 +21,8 @@ namespace Contract_Monthly_Claim_System.Data
                     PasswordHash = authService.HashPassword("Admin@123"),
                     Role = UserRole.HR,
                     Department = "Human Resources",
-                    HourlyRate = null,
-                    IsActive = true,
-                    CreatedDate = DateTime.UtcNow,
-                    UpdatedDate = DateTime.UtcNow
+                    IsActive = true
                 },
-                
-                // Lecturer 1
                 new ApplicationUser
                 {
                     FullName = "Chuma Makhathini",
@@ -41,12 +31,8 @@ namespace Contract_Monthly_Claim_System.Data
                     Role = UserRole.Lecturer,
                     Department = "Computer Science",
                     HourlyRate = 350.00m,
-                    IsActive = true,
-                    CreatedDate = DateTime.UtcNow,
-                    UpdatedDate = DateTime.UtcNow
+                    IsActive = true
                 },
-                
-                // Lecturer 2
                 new ApplicationUser
                 {
                     FullName = "Thabo Ndlovu",
@@ -55,12 +41,8 @@ namespace Contract_Monthly_Claim_System.Data
                     Role = UserRole.Lecturer,
                     Department = "Information Systems",
                     HourlyRate = 400.00m,
-                    IsActive = true,
-                    CreatedDate = DateTime.UtcNow,
-                    UpdatedDate = DateTime.UtcNow
+                    IsActive = true
                 },
-                
-                // Lecturer 3
                 new ApplicationUser
                 {
                     FullName = "Nomsa Dlamini",
@@ -69,12 +51,8 @@ namespace Contract_Monthly_Claim_System.Data
                     Role = UserRole.Lecturer,
                     Department = "Software Engineering",
                     HourlyRate = 375.00m,
-                    IsActive = true,
-                    CreatedDate = DateTime.UtcNow,
-                    UpdatedDate = DateTime.UtcNow
+                    IsActive = true
                 },
-                
-                // Programme Coordinator
                 new ApplicationUser
                 {
                     FullName = "Muzi Sithole",
@@ -82,13 +60,8 @@ namespace Contract_Monthly_Claim_System.Data
                     PasswordHash = authService.HashPassword("Coord@123"),
                     Role = UserRole.Coordinator,
                     Department = "Head of Computer Science",
-                    HourlyRate = null,
-                    IsActive = true,
-                    CreatedDate = DateTime.UtcNow,
-                    UpdatedDate = DateTime.UtcNow
+                    IsActive = true
                 },
-                
-                // Academic Manager
                 new ApplicationUser
                 {
                     FullName = "Ouma Stella",
@@ -96,22 +69,38 @@ namespace Contract_Monthly_Claim_System.Data
                     PasswordHash = authService.HashPassword("Manager@123"),
                     Role = UserRole.Manager,
                     Department = "Head of School of IT",
-                    HourlyRate = null,
-                    IsActive = true,
-                    CreatedDate = DateTime.UtcNow,
-                    UpdatedDate = DateTime.UtcNow
+                    IsActive = true
                 }
             };
 
-            await context.Users.AddRangeAsync(users);
+            // Iterate through each user to check if they exist
+            foreach (var user in users)
+            {
+                var existingUser = await context.Users
+                    .FirstOrDefaultAsync(u => u.Email == user.Email);
+
+                if (existingUser == null)
+                {
+                    // User does not exist, add them
+                    user.CreatedDate = DateTime.UtcNow;
+                    user.UpdatedDate = DateTime.UtcNow;
+                    await context.Users.AddAsync(user);
+                }
+                else
+                {
+                    // User exists, RESET the password to ensure login works
+                    existingUser.PasswordHash = user.PasswordHash;
+
+                    // Optional: Update other fields to match code
+                    existingUser.Role = user.Role;
+                    existingUser.HourlyRate = user.HourlyRate;
+                    existingUser.UpdatedDate = DateTime.UtcNow;
+                }
+            }
+
             await context.SaveChangesAsync();
 
-            Console.WriteLine("Database seeded successfully!");
-            Console.WriteLine("Default Credentials:");
-            Console.WriteLine("HR: hr@iiemsa.com / Admin@123");
-            Console.WriteLine("Lecturer: chuma.makhathini@iiemsa.com / Lecturer@123");
-            Console.WriteLine("Coordinator: muzi.sithole@iiemsa.com / Coord@123");
-            Console.WriteLine("Manager: ouma.stella@iiemsa.com / Manager@123");
+            Console.WriteLine("Database seeded/updated successfully!");
         }
     }
 }

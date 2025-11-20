@@ -23,7 +23,9 @@ namespace Contract_Monthly_Claim_System.Data
             // Configure ApplicationUser
             modelBuilder.Entity<ApplicationUser>(entity =>
             {
-                entity.ToTable("Users");
+                // Fix for Users table triggers
+                entity.ToTable("Users", tb => tb.UseSqlOutputClause(false));
+
                 entity.HasKey(e => e.Id);
                 entity.HasIndex(e => e.Email).IsUnique();
                 entity.Property(e => e.Email).IsRequired().HasMaxLength(256);
@@ -54,7 +56,11 @@ namespace Contract_Monthly_Claim_System.Data
             // Configure Claim
             modelBuilder.Entity<Claim>(entity =>
             {
-                entity.ToTable("Claims");
+                // --- CHANGE THIS LINE ---
+                // Fix for Claims table triggers (The error you just got)
+                entity.ToTable("Claims", tb => tb.UseSqlOutputClause(false));
+                // ------------------------
+
                 entity.HasKey(e => e.Id);
                 entity.HasIndex(e => e.ClaimNumber).IsUnique();
                 entity.HasIndex(e => e.UserId);
@@ -74,7 +80,9 @@ namespace Contract_Monthly_Claim_System.Data
             // Configure Document
             modelBuilder.Entity<Document>(entity =>
             {
-                entity.ToTable("Documents");
+                // It is safe to apply this here as well in case you have triggers on Documents too
+                entity.ToTable("Documents", tb => tb.UseSqlOutputClause(false));
+
                 entity.HasKey(e => e.Id);
                 entity.HasIndex(e => e.ClaimId);
                 entity.Property(e => e.FileName).IsRequired().HasMaxLength(255);
