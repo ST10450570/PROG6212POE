@@ -6,11 +6,20 @@
 
 <div class="d-flex justify-content-between align-items-center mb-4 border-bottom-themed pb-2">
     <h1 class="h2"><i class="fas fa-chart-line me-2"></i>Lecturer Performance Report</h1>
-    <form asp-action="GeneratePerformanceReport" method="post">
-        <button type="submit" class="btn btn-success">
-            <i class="fas fa-download me-1"></i> Export CSV
-        </button>
-    </form>
+    <div>
+        <form asp-action="GeneratePerformanceReport" method="post" class="d-inline me-2">
+            <input type="hidden" name="format" value="csv" />
+            <button type="submit" class="btn btn-success">
+                <i class="fas fa-file-csv me-1"></i> Export CSV
+            </button>
+        </form>
+        <form asp-action="GeneratePerformanceReport" method="post" class="d-inline">
+            <input type="hidden" name="format" value="pdf" />
+            <button type="submit" class="btn btn-danger">
+                <i class="fas fa-file-pdf me-1"></i> Export PDF
+            </button>
+        </form>
+    </div>
 </div>
 
 <div class="card">
@@ -34,35 +43,65 @@
                             <th>Hourly Rate</th>
                             <th>Total Claims</th>
                             <th>Approved</th>
+                            <th>Rejected</th>
                             <th>Total Amount</th>
                             <th>Avg Hours</th>
                             <th>Success Rate</th>
+                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach (var item in Model)
                         {
-                            var successRate = item.TotalClaims > 0 ? (item.ApprovedClaims * 100.0 / item.TotalClaims) : 0;
                             <tr>
                                 <td class="fw-bold">@item.LecturerName</td>
                                 <td>@item.Department</td>
                                 <td>@item.HourlyRate.ToString("C", new System.Globalization.CultureInfo("en-ZA"))</td>
                                 <td>@item.TotalClaims</td>
                                 <td>@item.ApprovedClaims</td>
+                                <td>@item.RejectedClaims</td>
                                 <td>@item.TotalAmount.ToString("C", new System.Globalization.CultureInfo("en-ZA"))</td>
                                 <td>@item.AverageHours.ToString("F1") hrs</td>
                                 <td>
                                     <div class="progress" style="height: 20px;">
-                                        <div class="progress-bar @(successRate >= 80 ? "bg-success" : successRate >= 60 ? "bg-warning" : "bg-danger")"
-                                             role="progressbar" style="width: @successRate%;"
-                                             aria-valuenow="@successRate" aria-valuemin="0" aria-valuemax="100">
-                                            @successRate.ToString("F1")%
+                                        <div class="progress-bar @(item.SuccessRate >= 80 ? "bg-success" : item.SuccessRate >= 60 ? "bg-warning" : "bg-danger")"
+                                             role="progressbar" style="width: @item.SuccessRate%;"
+                                             aria-valuenow="@item.SuccessRate" aria-valuemin="0" aria-valuemax="100">
+                                            @item.SuccessRate.ToString("F1")%
                                         </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="btn-group btn-group-sm">
+                                        <form asp-action="GenerateIndividualReport" method="post" class="d-inline me-1">
+                                            <input type="hidden" name="lecturerId" value="@item.LecturerId" />
+                                            <input type="hidden" name="type" value="csv" />
+                                            <button type="submit" class="btn btn-outline-success btn-sm" title="Export CSV">
+                                                <i class="fas fa-file-csv"></i>
+                                            </button>
+                                        </form>
+                                        <form asp-action="GenerateIndividualReport" method="post" class="d-inline">
+                                            <input type="hidden" name="lecturerId" value="@item.LecturerId" />
+                                            <input type="hidden" name="type" value="pdf" />
+                                            <button type="submit" class="btn btn-outline-danger btn-sm" title="Export PDF">
+                                                <i class="fas fa-file-pdf"></i>
+                                            </button>
+                                        </form>
                                     </div>
                                 </td>
                             </tr>
                         }
                     </tbody>
+                    <tfoot>
+                        <tr class="fw-bold">
+                            <td colspan="3" class="text-end">Totals:</td>
+                            <td>@Model.Sum(x => x.TotalClaims)</td>
+                            <td>@Model.Sum(x => x.ApprovedClaims)</td>
+                            <td>@Model.Sum(x => x.RejectedClaims)</td>
+                            <td>@Model.Sum(x => x.TotalAmount).ToString("C", new System.Globalization.CultureInfo("en-ZA"))</td>
+                            <td colspan="3"></td>
+                        </tr>
+                    </tfoot>
                 </table>
             </div>
         }

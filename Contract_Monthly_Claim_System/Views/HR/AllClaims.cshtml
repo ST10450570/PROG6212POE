@@ -1,5 +1,4 @@
-﻿
-@model IEnumerable<Claim>
+﻿@model IEnumerable<Claim>
 
 @{
     ViewData["Title"] = "All Claims";
@@ -7,12 +6,20 @@
 
 <div class="d-flex justify-content-between align-items-center mb-4 border-bottom-themed pb-2">
     <h1 class="h2"><i class="fas fa-list me-2"></i>All Claims</h1>
-    <form asp-action="GenerateReport" asp-route-reportType="all" method="post">
-        @Html.AntiForgeryToken()
-        <button type="submit" class="btn btn-success">
-            <i class="fas fa-file-csv me-1"></i>Export to CSV
-        </button>
-    </form>
+    <div>
+        <form asp-action="GenerateAllClaimsReport" method="post" class="d-inline me-2">
+            <input type="hidden" name="format" value="pdf" />
+            <button type="submit" class="btn btn-danger">
+                <i class="fas fa-file-pdf me-1"></i> Export PDF
+            </button>
+        </form>
+        <form asp-action="GenerateReport" asp-route-reportType="all" method="post" class="d-inline">
+            @Html.AntiForgeryToken()
+            <button type="submit" class="btn btn-success">
+                <i class="fas fa-file-csv me-1"></i>Export to CSV
+            </button>
+        </form>
+    </div>
 </div>
 
 <div class="card">

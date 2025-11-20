@@ -30,6 +30,27 @@ $(document).ready(function () {
             $('#file-upload-feedback').text('');
         }
     });
+
+    // --- Password Visibility Toggle ---
+    $(document).on('click', '.toggle-password', function () {
+        // Find the input field relative to the clicked button
+        const input = $(this).closest('.input-group').find('input');
+        const icon = $(this).find('i');
+
+        if (input.attr('type') === 'password') {
+            input.attr('type', 'text');
+            icon.removeClass('fa-eye').addClass('fa-eye-slash');
+        } else {
+            input.attr('type', 'password');
+            icon.removeClass('fa-eye-slash').addClass('fa-eye');
+        }
+    });
+
+    // --- Modal Event Handler Setup ---
+    const actionModal = document.getElementById('actionModal');
+    if (actionModal) {
+        actionModal.addEventListener('show.bs.modal', setupActionModal);
+    }
 });
 
 // --- IMPROVED Modal Handler for Reviewer Actions ---

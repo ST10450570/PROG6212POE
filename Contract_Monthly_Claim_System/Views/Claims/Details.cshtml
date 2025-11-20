@@ -144,7 +144,7 @@
             }
 
             // COORDINATOR ACTIONS ON DETAILS PAGE
-            else if (currentUser?.Role == UserRole.Coordinator && Model.Status == ClaimStatus.Submitted)
+            else if (currentUser?.Role == UserRole.Coordinator)
             {
                 <div class="card">
                     <div class="card-header bg-warning bg-opacity-10">
@@ -152,22 +152,25 @@
                     </div>
                     <div class="card-body">
                         <div class="d-grid gap-2">
-                            <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#actionModal"
-                                    data-action-type="Verify" data-claim-id="@Model.Id" data-claim-number="@Model.ClaimNumber">
-                                <i class="fas fa-check me-1"></i> Verify Claim
-                            </button>
+                            @if (Model.Status == ClaimStatus.Submitted)
+                            {
+                                <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#actionModal"
+                                        data-action-type="Verify" data-claim-id="@Model.Id" data-claim-number="@Model.ClaimNumber">
+                                    <i class="fas fa-check me-1"></i> Verify Claim
+                                </button>
 
-                            <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#actionModal"
-                                    data-action-type="Return" data-claim-id="@Model.Id" data-claim-number="@Model.ClaimNumber">
-                                <i class="fas fa-undo me-1"></i> Return for Correction
-                            </button>
+                                <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#actionModal"
+                                        data-action-type="Return" data-claim-id="@Model.Id" data-claim-number="@Model.ClaimNumber">
+                                    <i class="fas fa-undo me-1"></i> Return for Correction
+                                </button>
 
-                            <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#actionModal"
-                                    data-action-type="Reject" data-claim-id="@Model.Id" data-claim-number="@Model.ClaimNumber">
-                                <i class="fas fa-times me-1"></i> Reject Claim
-                            </button>
+                                <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#actionModal"
+                                        data-action-type="Reject" data-claim-id="@Model.Id" data-claim-number="@Model.ClaimNumber">
+                                    <i class="fas fa-times me-1"></i> Reject Claim
+                                </button>
+                            }
 
-                            <a asp-action="PendingCoordinator" class="btn btn-outline-secondary mt-3">
+                            <a asp-action="PendingCoordinator" class="btn btn-outline-secondary @(Model.Status != ClaimStatus.Submitted ? "mt-3" : "")">
                                 <i class="fas fa-arrow-left me-1"></i> Back to Pending Claims
                             </a>
                         </div>
@@ -176,7 +179,7 @@
             }
 
             // MANAGER ACTIONS ON DETAILS PAGE
-            else if (currentUser?.Role == UserRole.Manager && Model.Status == ClaimStatus.Verified)
+            else if (currentUser?.Role == UserRole.Manager)
             {
                 <div class="card">
                     <div class="card-header bg-info bg-opacity-10">
@@ -184,17 +187,20 @@
                     </div>
                     <div class="card-body">
                         <div class="d-grid gap-2">
-                            <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#actionModal"
-                                    data-action-type="Approve" data-claim-id="@Model.Id" data-claim-number="@Model.ClaimNumber">
-                                <i class="fas fa-check-double me-1"></i> Approve Claim
-                            </button>
+                            @if (Model.Status == ClaimStatus.Verified)
+                            {
+                                <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#actionModal"
+                                        data-action-type="Approve" data-claim-id="@Model.Id" data-claim-number="@Model.ClaimNumber">
+                                    <i class="fas fa-check-double me-1"></i> Approve Claim
+                                </button>
 
-                            <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#actionModal"
-                                    data-action-type="Reject" data-claim-id="@Model.Id" data-claim-number="@Model.ClaimNumber">
-                                <i class="fas fa-times me-1"></i> Reject Claim
-                            </button>
+                                <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#actionModal"
+                                        data-action-type="Reject" data-claim-id="@Model.Id" data-claim-number="@Model.ClaimNumber">
+                                    <i class="fas fa-times me-1"></i> Reject Claim
+                                </button>
+                            }
 
-                            <a asp-action="PendingManager" class="btn btn-outline-secondary mt-3">
+                            <a asp-action="PendingManager" class="btn btn-outline-secondary @(Model.Status != ClaimStatus.Verified ? "mt-3" : "")">
                                 <i class="fas fa-arrow-left me-1"></i> Back to Pending Claims
                             </a>
                         </div>
@@ -202,13 +208,13 @@
                 </div>
             }
 
-            // HR OR OTHER ROLES - JUST VIEW
-            else
+            // HR SPECIFIC VIEW
+            else if (currentUser?.Role == UserRole.HR)
             {
                 <div class="card">
                     <div class="card-body text-center">
-                        <a asp-action="Dashboard" asp-controller="@(currentUser?.Role == UserRole.HR ? "HR" : "Claims")" class="btn btn-outline-secondary">
-                            <i class="fas fa-arrow-left me-1"></i> Back to Dashboard
+                        <a asp-action="Dashboard" asp-controller="HR" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-1"></i> Back to HR Dashboard
                         </a>
                     </div>
                 </div>
