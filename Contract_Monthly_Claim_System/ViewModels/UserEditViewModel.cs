@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using Contract_Monthly_Claim_System.Models;
 
-namespace Contract_Monthly_Claim_System.Models.ViewModel
+namespace Contract_Monthly_Claim_System.ViewModels
 {
     public class UserEditViewModel
     {

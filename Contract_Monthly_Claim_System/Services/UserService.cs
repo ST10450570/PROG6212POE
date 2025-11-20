@@ -1,6 +1,5 @@
 ﻿using Contract_Monthly_Claim_System.Data;
 using Contract_Monthly_Claim_System.Models;
-using Contract_Monthly_Claim_System.Models.ViewModel;
 using Contract_Monthly_Claim_System.ViewModels;
 using Microsoft.EntityFrameworkCore;
 
