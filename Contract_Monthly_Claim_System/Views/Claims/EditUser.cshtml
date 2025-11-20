@@ -1,0 +1,121 @@
+﻿@using Contract_Monthly_Claim_System.ViewModels
+@model UserEditViewModel
+
+@{
+    ViewData["Title"] = $"Edit User - {Model.FullName}";
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-user-edit me-2"></i>@ViewData["Title"]</h5>
+            </div>
+            <div class="card-body">
+                <form asp-action="EditUser" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" asp-for="Id" />
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="FullName" class="form-label"></label>
+                            <input asp-for="FullName" class="form-control" />
+                            <span asp-validation-for="FullName" class="text-danger"></span>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="Email" class="form-label"></label>
+                            <input asp-for="Email" class="form-control" type="email" />
+                            <span asp-validation-for="Email" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="Role" class="form-label"></label>
+                            <select asp-for="Role" class="form-select" id="roleSelect">
+                                <option value="0">Lecturer</option>
+                                <option value="1">Programme Coordinator</option>
+                                <option value="2">Academic Manager</option>
+                                <option value="3">HR Administrator</option>
+                            </select>
+                            <span asp-validation-for="Role" class="text-danger"></span>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="Department" class="form-label"></label>
+                            <input asp-for="Department" class="form-control" />
+                            <span asp-validation-for="Department" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3" id="hourlyRateSection">
+                            <label asp-for="HourlyRate" class="form-label"></label>
+                            <div class="input-group">
+                                <span class="input-group-text">R</span>
+                                <input asp-for="HourlyRate" class="form-control" />
+                            </div>
+                            <span asp-validation-for="HourlyRate" class="text-danger"></span>
+                            <small class="form-text text-muted">Required for Lecturers (R50 - R1000)</small>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="NewPassword" class="form-label"></label>
+                            <input asp-for="NewPassword" class="form-control" type="password" placeholder="Leave blank to keep current" />
+                            <span asp-validation-for="NewPassword" class="text-danger"></span>
+                            <small class="form-text text-muted">Leave blank to keep current password</small>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="form-check form-switch">
+                            <input asp-for="IsActive" class="form-check-input" />
+                            <label asp-for="IsActive" class="form-check-label"></label>
+                        </div>
+                        <small class="form-text text-muted">Inactive users cannot log in</small>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-1"></i>Save Changes
+                        </button>
+                        <a asp-action="Users" class="btn btn-outline-secondary">
+                            <i class="fas fa-times me-1"></i>Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const roleSelect = document.getElementById('roleSelect');
+            const hourlyRateSection = document.getElementById('hourlyRateSection');
+            const hourlyRateInput = document.querySelector('input[name="HourlyRate"]');
+
+            function toggleHourlyRate() {
+                // Show hourly rate field only for Lecturers (role = 0)
+                if (roleSelect.value === '0') {
+                    hourlyRateSection.style.display = 'block';
+                    hourlyRateInput.required = true;
+                } else {
+                    hourlyRateSection.style.display = 'none';
+                    hourlyRateInput.required = false;
+                }
+            }
+
+            roleSelect.addEventListener('change', toggleHourlyRate);
+
+            // Initial state
+            toggleHourlyRate();
+        });
+    </script>
+}

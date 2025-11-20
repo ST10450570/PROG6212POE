@@ -67,6 +67,10 @@ namespace Contract_Monthly_Claim_System.Services
             if (!user.HourlyRate.HasValue || user.HourlyRate.Value <= 0)
                 throw new InvalidOperationException("Your hourly rate has not been set by HR. Please contact HR to set your rate before submitting claims.");
 
+            // Validate hours - maximum 180 hours per month
+            if (viewModel.HoursWorked > 180)
+                throw new InvalidOperationException("Hours worked cannot exceed 180 hours per month.");
+
             // Use the hourly rate from user profile (set by HR)
             var hourlyRate = user.HourlyRate.Value;
 
@@ -87,7 +91,7 @@ namespace Contract_Monthly_Claim_System.Services
             _context.Claims.Add(newClaim);
             await _context.SaveChangesAsync();
 
-            // Handle document upload if provided (now optional)
+            // Handle document upload if provided (OPTIONAL)
             if (viewModel.SupportingDocument != null)
             {
                 byte[] encryptedData;
@@ -163,16 +167,17 @@ namespace Contract_Monthly_Claim_System.Services
             if (claim == null || !claim.CanReject)
                 throw new InvalidOperationException("Claim not found or cannot be rejected.");
 
+            var currentStatus = claim.Status;
             claim.Status = ClaimStatus.Rejected;
             claim.RejectionReason = reason;
             claim.UpdatedDate = DateTime.UtcNow;
 
             // Set reviewer ID based on current status
-            if (claim.Status == ClaimStatus.Submitted)
+            if (currentStatus == ClaimStatus.Submitted)
             {
                 claim.CoordinatorId = reviewerId;
             }
-            else if (claim.Status == ClaimStatus.Verified)
+            else if (currentStatus == ClaimStatus.Verified)
             {
                 claim.ManagerId = reviewerId;
             }
@@ -244,6 +249,10 @@ namespace Contract_Monthly_Claim_System.Services
             if (claim.Status != ClaimStatus.Draft && claim.Status != ClaimStatus.Returned)
                 throw new InvalidOperationException("Only draft and returned claims can be edited.");
 
+            // Validate hours - maximum 180 hours per month
+            if (viewModel.HoursWorked > 180)
+                throw new InvalidOperationException("Hours worked cannot exceed 180 hours per month.");
+
             // Use the user's current hourly rate (as set by HR)
             var hourlyRate = claim.User?.HourlyRate ?? viewModel.HourlyRate;
 
@@ -283,8 +292,6 @@ namespace Contract_Monthly_Claim_System.Services
                 .OrderByDescending(c => c.SubmittedDate)
                 .ToListAsync();
         }
-
-
 
         private string GenerateClaimNumber()
         {

@@ -12,27 +12,32 @@
             </div>
             <div class="card-body p-4">
                 <form asp-action="Create" method="post" enctype="multipart/form-data">
+                    @Html.AntiForgeryToken()
                     <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
 
                     <div class="mb-3">
                         <label asp-for="WorkDescription" class="form-label"></label>
-                        <input asp-for="WorkDescription" class="form-control" />
+                        <input asp-for="WorkDescription" class="form-control" placeholder="e.g., Programming 2B - Lecture and Lab Sessions" />
                         <span asp-validation-for="WorkDescription" class="text-danger"></span>
                     </div>
 
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label asp-for="HoursWorked" class="form-label"></label>
-                            <input asp-for="HoursWorked" id="hours" class="form-control" />
+                            <input asp-for="HoursWorked" id="hours" class="form-control" placeholder="0.0" />
                             <span asp-validation-for="HoursWorked" class="text-danger"></span>
+                            <small class="form-text text-muted">Maximum 180 hours per month</small>
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label asp-for="HourlyRate" class="form-label"></label>
+                            <label asp-for="HourlyRate" class="form-label">
+                                Hourly Rate (Set by HR)
+                            </label>
                             <div class="input-group">
                                 <span class="input-group-text">R</span>
-                                <input asp-for="HourlyRate" id="rate" class="form-control" />
+                                <input asp-for="HourlyRate" id="rate" class="form-control" readonly style="background-color: #e9ecef;" />
                             </div>
                             <span asp-validation-for="HourlyRate" class="text-danger"></span>
+                            <small class="form-text text-muted">Rate is automatically set by HR</small>
                         </div>
                     </div>
 
@@ -43,26 +48,34 @@
 
                     <div class="mb-3">
                         <label asp-for="Notes" class="form-label"></label>
-                        <textarea asp-for="Notes" class="form-control" rows="3"></textarea>
+                        <textarea asp-for="Notes" class="form-control" rows="3" placeholder="Any additional information about this claim..."></textarea>
                         <span asp-validation-for="Notes" class="text-danger"></span>
                     </div>
 
                     <hr class="my-4" />
 
                     <div class="mb-3">
-                        <label asp-for="SupportingDocument" class="form-label"></label>
-                        <input asp-for="SupportingDocument" class="form-control" type="file" id="fileUpload" />
+                        <label asp-for="SupportingDocument" class="form-label">
+                            <i class="fas fa-paperclip me-1"></i>Supporting Document (Optional)
+                        </label>
+                        <input asp-for="SupportingDocument" class="form-control" type="file" id="fileUpload" accept=".pdf,.docx,.xlsx" />
                         <span asp-validation-for="SupportingDocument" class="text-danger"></span>
                         <div id="file-upload-feedback" class="form-text mt-2 text-success"></div>
+                        <small class="form-text text-muted">Accepted: PDF, DOCX, XLSX (Max 5MB)</small>
                     </div>
 
                     <div class="d-grid mt-4">
-                        <button type="submit" class="btn btn-primary btn-lg"><i class="fas fa-paper-plane me-2"></i>Create Claim</button>
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fas fa-save me-2"></i>Create Claim (Draft)
+                        </button>
                     </div>
                 </form>
             </div>
             <div class="card-footer text-center">
-                <div class="small"><a asp-action="MyClaims">Back to My Claims</a></div>
+                <div class="small">
+                    <a asp-action="Dashboard"><i class="fas fa-arrow-left me-1"></i>Back to Dashboard</a> |
+                    <a asp-action="MyClaims"><i class="fas fa-list me-1"></i>My Claims</a>
+                </div>
             </div>
         </div>
     </div>
@@ -73,11 +86,47 @@
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
     <script>
-        // Use site.js for this logic by adding data attributes
+        // Auto-calculate total when hours change
         document.addEventListener("DOMContentLoaded", function () {
-            // Add data attributes to trigger the calculator
-            document.getElementById('hours').setAttribute('data-calculate', 'total');
-            document.getElementById('rate').setAttribute('data-calculate', 'total');
+            const hoursInput = document.getElementById('hours');
+            const rateInput = document.getElementById('rate');
+            const totalDisplay = document.getElementById('total-display');
+
+            function calculateTotal() {
+                const hours = parseFloat(hoursInput.value) || 0;
+                const rate = parseFloat(rateInput.value) || 0;
+                const total = hours * rate;
+
+                totalDisplay.textContent = new Intl.NumberFormat('en-ZA', {
+                    style: 'currency',
+                    currency: 'ZAR'
+                }).format(total);
+
+                // Validate hours
+                if (hours > 180) {
+                    hoursInput.setCustomValidity('Hours cannot exceed 180 per month');
+                } else {
+                    hoursInput.setCustomValidity('');
+                }
+            }
+
+            hoursInput.addEventListener('input', calculateTotal);
+            rateInput.addEventListener('input', calculateTotal);
+
+            // Initial calculation
+            calculateTotal();
+        });
+
+        // File upload feedback
+        document.getElementById('fileUpload').addEventListener('change', function() {
+            const fileName = this.value.split('\\').pop();
+            const feedback = document.getElementById('file-upload-feedback');
+
+            if (fileName) {
+                feedback.innerHTML = '<i class="fas fa-check-circle me-1"></i>File selected: ' + fileName;
+            } else {
+                feedback.innerHTML = '';
+            }
         });
     </script>
 }

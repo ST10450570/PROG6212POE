@@ -1,0 +1,119 @@
+﻿@model UserCreateViewModel
+
+@{
+    ViewData["Title"] = "Create New User";
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-user-plus me-2"></i>@ViewData["Title"]</h5>
+            </div>
+            <div class="card-body">
+                <form asp-action="CreateUser" method="post">
+                    @Html.AntiForgeryToken()
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="FullName" class="form-label"></label>
+                            <input asp-for="FullName" class="form-control" placeholder="John Doe" />
+                            <span asp-validation-for="FullName" class="text-danger"></span>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="Email" class="form-label"></label>
+                            <input asp-for="Email" class="form-control" type="email" placeholder="john.doe@iiemsa.com" />
+                            <span asp-validation-for="Email" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="Role" class="form-label"></label>
+                            <select asp-for="Role" class="form-select" id="roleSelect">
+                                <option value="">-- Select Role --</option>
+                                <option value="0">Lecturer</option>
+                                <option value="1">Programme Coordinator</option>
+                                <option value="2">Academic Manager</option>
+                                <option value="3">HR Administrator</option>
+                            </select>
+                            <span asp-validation-for="Role" class="text-danger"></span>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="Department" class="form-label"></label>
+                            <input asp-for="Department" class="form-control" placeholder="Computer Science" />
+                            <span asp-validation-for="Department" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="Password" class="form-label"></label>
+                            <input asp-for="Password" class="form-control" type="password" placeholder="Minimum 6 characters" />
+                            <span asp-validation-for="Password" class="text-danger"></span>
+                            <small class="form-text text-muted">Minimum 6 characters required</small>
+                        </div>
+
+                        <div class="col-md-6 mb-3" id="hourlyRateSection" style="display:none;">
+                            <label asp-for="HourlyRate" class="form-label"></label>
+                            <div class="input-group">
+                                <span class="input-group-text">R</span>
+                                <input asp-for="HourlyRate" class="form-control" placeholder="350.00" />
+                            </div>
+                            <span asp-validation-for="HourlyRate" class="text-danger"></span>
+                            <small class="form-text text-muted">Required for Lecturers (R50 - R1000)</small>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>Note:</strong> The user will receive these credentials and should change their password after first login.
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-1"></i>Create User
+                        </button>
+                        <a asp-action="Users" class="btn btn-outline-secondary">
+                            <i class="fas fa-times me-1"></i>Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const roleSelect = document.getElementById('roleSelect');
+            const hourlyRateSection = document.getElementById('hourlyRateSection');
+            const hourlyRateInput = document.querySelector('input[name="HourlyRate"]');
+
+            roleSelect.addEventListener('change', function() {
+                // Show hourly rate field only for Lecturers (role = 0)
+                if (this.value === '0') {
+                    hourlyRateSection.style.display = 'block';
+                    hourlyRateInput.required = true;
+                } else {
+                    hourlyRateSection.style.display = 'none';
+                    hourlyRateInput.required = false;
+                    hourlyRateInput.value = '';
+                }
+            });
+
+            // Trigger on page load if role is already selected
+            if (roleSelect.value === '0') {
+                hourlyRateSection.style.display = 'block';
+                hourlyRateInput.required = true;
+            }
+        });
+    </script>
+}

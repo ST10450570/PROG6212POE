@@ -34,7 +34,7 @@
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
             padding: 2.5rem;
             width: 100%;
-            max-width: 400px;
+            max-width: 450px;
             border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
@@ -59,6 +59,34 @@
             .login-logo p {
                 color: #718096;
                 margin: 0.5rem 0 0 0;
+            }
+
+        .credentials-card {
+            background: #f7fafc;
+            border-radius: 12px;
+            padding: 1rem;
+            margin-top: 1.5rem;
+            border: 1px solid #e2e8f0;
+        }
+
+            .credentials-card h6 {
+                font-size: 0.875rem;
+                font-weight: 600;
+                color: #4a5568;
+                margin-bottom: 0.75rem;
+            }
+
+        .credential-item {
+            font-size: 0.8rem;
+            color: #718096;
+            margin-bottom: 0.5rem;
+            padding: 0.5rem;
+            background: white;
+            border-radius: 6px;
+        }
+
+            .credential-item strong {
+                color: #2d3748;
             }
     </style>
 </head>
@@ -94,7 +122,7 @@
                     <label asp-for="Email" class="form-label">Email Address</label>
                     <div class="input-group">
                         <span class="input-group-text"><i class="fas fa-envelope"></i></span>
-                        <input asp-for="Email" class="form-control" placeholder="Enter your email" />
+                        <input asp-for="Email" class="form-control" placeholder="Enter your email" autofocus />
                     </div>
                     <span asp-validation-for="Email" class="text-danger small"></span>
                 </div>
@@ -120,12 +148,21 @@
                 </div>
             </form>
 
-           
-            <div class="text-center mt-4">
-                <small class="text-muted">
-                    <i class="fas fa-info-circle me-1"></i>
-                    Use the buttons above for quick demo access
-                </small>
+            <!-- Demo Credentials -->
+            <div class="credentials-card">
+                <h6><i class="fas fa-info-circle me-1"></i> Demo Credentials</h6>
+                <div class="credential-item">
+                    <strong>HR:</strong> hr@iiemsa.com / Admin@123
+                </div>
+                <div class="credential-item">
+                    <strong>Lecturer:</strong> chuma.makhathini@iiemsa.com / Lecturer@123
+                </div>
+                <div class="credential-item">
+                    <strong>Coordinator:</strong> muzi.sithole@iiemsa.com / Coord@123
+                </div>
+                <div class="credential-item">
+                    <strong>Manager:</strong> ouma.stella@iiemsa.com / Manager@123
+                </div>
             </div>
         </div>
     </div>

@@ -97,6 +97,8 @@
 
         @{
             var currentUser = UserSession.GetCurrentUser();
+
+            // LECTURER ACTIONS
             if (currentUser?.Role == UserRole.Lecturer)
             {
                 <div class="card">
@@ -113,6 +115,7 @@
                                 </a>
 
                                 <form asp-action="Submit" method="post" class="d-grid">
+                                    @Html.AntiForgeryToken()
                                     <input type="hidden" name="id" value="@Model.Id" />
                                     <button type="submit" class="btn btn-success"
                                             onclick="return confirm('Are you sure you want to submit this claim for review? This action cannot be undone.')">
@@ -131,24 +134,135 @@
                                     </small>
                                 </form>
                             }
-                            else if (Model.CanSubmit)
-                            {
-                                <form asp-action="Submit" method="post" class="d-grid">
-                                    <input type="hidden" name="id" value="@Model.Id" />
-                                    <button type="submit" class="btn btn-success" onclick="return confirm('Are you sure you want to submit this claim for review? This action cannot be undone.')">
-                                        <i class="fas fa-paper-plane me-1"></i> Submit for Review
-                                    </button>
-                                    <small class="text-center text-secondary mt-2">Submitting will lock the claim from further edits unless it is returned by coordinator.</small>
-                                </form>
-                            }
 
                             <a asp-action="Dashboard" class="btn btn-outline-secondary">
-								<i class="fas fa-arrow-left me-1"></i> Back to Dashboard
+                                <i class="fas fa-arrow-left me-1"></i> Back to Dashboard
                             </a>
                         </div>
+                    </div>
+                </div>
+            }
+
+            // COORDINATOR ACTIONS ON DETAILS PAGE
+            else if (currentUser?.Role == UserRole.Coordinator && Model.Status == ClaimStatus.Submitted)
+            {
+                <div class="card">
+                    <div class="card-header bg-warning bg-opacity-10">
+                        <h6 class="mb-0"><i class="fas fa-clipboard-check me-2"></i>Coordinator Actions</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#actionModal"
+                                    data-action-type="Verify" data-claim-id="@Model.Id" data-claim-number="@Model.ClaimNumber">
+                                <i class="fas fa-check me-1"></i> Verify Claim
+                            </button>
+
+                            <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#actionModal"
+                                    data-action-type="Return" data-claim-id="@Model.Id" data-claim-number="@Model.ClaimNumber">
+                                <i class="fas fa-undo me-1"></i> Return for Correction
+                            </button>
+
+                            <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#actionModal"
+                                    data-action-type="Reject" data-claim-id="@Model.Id" data-claim-number="@Model.ClaimNumber">
+                                <i class="fas fa-times me-1"></i> Reject Claim
+                            </button>
+
+                            <a asp-action="PendingCoordinator" class="btn btn-outline-secondary mt-3">
+                                <i class="fas fa-arrow-left me-1"></i> Back to Pending Claims
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
+
+            // MANAGER ACTIONS ON DETAILS PAGE
+            else if (currentUser?.Role == UserRole.Manager && Model.Status == ClaimStatus.Verified)
+            {
+                <div class="card">
+                    <div class="card-header bg-info bg-opacity-10">
+                        <h6 class="mb-0"><i class="fas fa-user-tie me-2"></i>Manager Actions</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#actionModal"
+                                    data-action-type="Approve" data-claim-id="@Model.Id" data-claim-number="@Model.ClaimNumber">
+                                <i class="fas fa-check-double me-1"></i> Approve Claim
+                            </button>
+
+                            <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#actionModal"
+                                    data-action-type="Reject" data-claim-id="@Model.Id" data-claim-number="@Model.ClaimNumber">
+                                <i class="fas fa-times me-1"></i> Reject Claim
+                            </button>
+
+                            <a asp-action="PendingManager" class="btn btn-outline-secondary mt-3">
+                                <i class="fas fa-arrow-left me-1"></i> Back to Pending Claims
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
+
+            // HR OR OTHER ROLES - JUST VIEW
+            else
+            {
+                <div class="card">
+                    <div class="card-body text-center">
+                        <a asp-action="Dashboard" asp-controller="@(currentUser?.Role == UserRole.HR ? "HR" : "Claims")" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-1"></i> Back to Dashboard
+                        </a>
                     </div>
                 </div>
             }
         }
     </div>
 </div>
+
+<!-- ACTION MODAL (for Coordinator and Manager) -->
+<div class="modal fade" id="actionModal" tabindex="-1" aria-labelledby="actionModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <form method="post">
+                @Html.AntiForgeryToken()
+                <div class="modal-header">
+                    <h5 class="modal-title" id="actionModalTitle">Action Required</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>You are about to <strong id="actionName"></strong> claim <strong id="actionClaimNumber"></strong>.</p>
+                    <input type="hidden" name="id" id="actionClaimId" />
+                    <div class="mb-3" id="comments-section">
+                        <label class="form-label" id="comments-label">Comments (Optional)</label>
+                        <textarea class="form-control" name="comments" rows="3"></textarea>
+                    </div>
+                    <div class="mb-3" id="reason-section" style="display: none;">
+                        <label class="form-label" id="reason-label">Reason for Rejection *</label>
+                        <input type="text" class="form-control" name="reason" />
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn" id="actionSubmitButton">Confirm</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const actionModal = document.getElementById('actionModal');
+
+            if (actionModal) {
+                actionModal.addEventListener('show.bs.modal', function (event) {
+                    setupActionModal(event);
+                });
+
+                actionModal.addEventListener('hidden.bs.modal', function () {
+                    const form = actionModal.querySelector('form');
+                    if (form) form.reset();
+                });
+            }
+        });
+    </script>
+}
