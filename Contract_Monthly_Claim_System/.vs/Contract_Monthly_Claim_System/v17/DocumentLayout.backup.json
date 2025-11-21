@@ -232,8 +232,7 @@
               "RelativeToolTip": "Views\\Claims\\Details.cshtml",
               "ViewState": "AgIAAPcAAAAAAAAAAAAswBEBAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2025-10-20T16:12:18.686Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-10-20T16:12:18.686Z"
             },
             {
               "$type": "Document",
@@ -245,8 +244,7 @@
               "RelativeToolTip": "Views\\HR\\LecturerPerformance.cshtml",
               "ViewState": "AgIAAFgAAAAAAAAAAAAswGwAAAAGAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2025-11-20T14:42:16.065Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-11-20T14:42:16.065Z"
             },
             {
               "$type": "Document",
@@ -258,8 +256,7 @@
               "RelativeToolTip": "ViewModels\\LecturePerformanceViewModel.cs",
               "ViewState": "AgIAAAYAAAAAAAAAAAAzwA8AAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-19T12:30:33.874Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-11-19T12:30:33.874Z"
             },
             {
               "$type": "Document",
@@ -284,8 +281,7 @@
               "RelativeToolTip": "wwwroot\\js\\site.js",
               "ViewState": "AgIAAKcAAAAAAAAAAAAswLsAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
-              "WhenOpened": "2025-10-21T10:26:52.101Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-10-21T10:26:52.101Z"
             },
             {
               "$type": "Document",
@@ -297,8 +293,7 @@
               "RelativeToolTip": "Views\\Claims\\PendingCoordinator.cshtml",
               "ViewState": "AgIAAIQAAAAAAAAAAAAswJgAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2025-10-20T17:07:04.848Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-10-20T17:07:04.848Z"
             },
             {
               "$type": "Document",
@@ -310,8 +305,7 @@
               "RelativeToolTip": "Views\\HR\\Reports.cshtml",
               "ViewState": "AgIAAEAAAAAAAAAAAAAswFQAAAAGAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2025-11-20T21:09:41.603Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-11-20T21:09:41.603Z"
             },
             {
               "$type": "Document",
@@ -323,8 +317,7 @@
               "RelativeToolTip": "Views\\HR\\AllClaims.cshtml",
               "ViewState": "AgIAADQAAAAAAAAAAAAswEgAAAAGAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2025-11-20T22:22:28.455Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-11-20T22:22:28.455Z"
             },
             {
               "$type": "Document",
@@ -336,8 +329,7 @@
               "RelativeToolTip": "Views\\Claims\\PendingManager.cshtml",
               "ViewState": "AgIAAIMAAAAAAAAAAAAswJcAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2025-10-21T19:26:06.627Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-10-21T19:26:06.627Z"
             },
             {
               "$type": "Document",
@@ -349,8 +341,7 @@
               "RelativeToolTip": "Services\\UserService.cs",
               "ViewState": "AgIAAHIAAAAAAAAAAAAswIYAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-19T11:54:15.2Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-11-19T11:54:15.2Z"
             },
             {
               "$type": "Document",
@@ -362,8 +353,7 @@
               "RelativeToolTip": "Views\\HR\\CreateUser.cshtml",
               "ViewState": "AgIAAGgAAAAAAAAAAAAswHwAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2025-11-20T21:41:09.991Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-11-20T21:41:09.991Z"
             },
             {
               "$type": "Document",
@@ -375,8 +365,7 @@
               "RelativeToolTip": "Views\\HR\\EditUser.cshtml",
               "ViewState": "AgIAAGkAAAAAAAAAAAAswH0AAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2025-11-20T21:43:42.808Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-11-20T21:43:42.808Z"
             },
             {
               "$type": "Document",
@@ -388,8 +377,7 @@
               "RelativeToolTip": "Views\\Shared\\Login.cshtml",
               "ViewState": "AgIAAJQAAAAAAAAAAAAswJsAAABRAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2025-11-19T12:49:11.959Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-11-19T12:49:11.959Z"
             },
             {
               "$type": "Document",
@@ -401,8 +389,7 @@
               "RelativeToolTip": "Views\\HR\\Users.cshtml",
               "ViewState": "AgIAAGoAAAAAAAAAAAAswH4AAAAGAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2025-11-20T21:08:36.508Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-11-20T21:08:36.508Z"
             },
             {
               "$type": "Document",
@@ -414,8 +401,7 @@
               "RelativeToolTip": "Services\\IUserSessionService.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-21T10:06:59.164Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-10-21T10:06:59.164Z"
             },
             {
               "$type": "Document",
@@ -427,8 +413,7 @@
               "RelativeToolTip": "Services\\IUserService.cs",
               "ViewState": "AgIAAAMAAAAAAAAAAAAuwBAAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-19T11:53:32.695Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-11-19T11:53:32.695Z"
             },
             {
               "$type": "Document",
@@ -440,8 +425,7 @@
               "RelativeToolTip": "Data\\DbInitializer.cs",
               "ViewState": "AgIAACoAAAAAAAAAAAArwB8AAAAyAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-19T12:33:53.936Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-11-19T12:33:53.936Z"
             },
             {
               "$type": "Document",
