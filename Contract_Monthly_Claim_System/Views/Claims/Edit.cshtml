@@ -35,12 +35,15 @@
                         </div>
 
                         <div class="col-md-6 mb-3">
-                            <label asp-for="HourlyRate" class="form-label"></label>
+                            <label asp-for="HourlyRate" class="form-label">
+                                Hourly Rate (Set by HR)
+                            </label>
                             <div class="input-group">
                                 <span class="input-group-text">R</span>
-                                <input asp-for="HourlyRate" class="form-control" />
+                                <input asp-for="HourlyRate" id="rate" class="form-control" readonly style="background-color: #e9ecef;" />
                             </div>
                             <span asp-validation-for="HourlyRate" class="text-danger"></span>
+                            <small class="form-text text-muted">Rate is automatically set by HR</small>
                         </div>
                     </div>
 
